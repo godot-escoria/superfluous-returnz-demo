@@ -1,0 +1,137 @@
+[gd_scene load_steps=3 format=3 uid="uid://cj02p2rfv12br"]
+
+[ext_resource type="PackedScene" uid="uid://chf3qovs1q8kr" path="res://game/characters/mark/mark.tscn" id="1"]
+[ext_resource type="Script" uid="uid://grwlokhruew6" path="res://addons/escoria-core/testing/player_angles_finder.gd" id="2"]
+
+[node name="player_angles_finder" type="Node2D"]
+script = ExtResource("2")
+
+[node name="areas" type="Node2D" parent="."]
+
+[node name="player" parent="." instance=ExtResource("1")]
+position = Vector2(640, 480)
+dialog_position_node = NodePath("../../player_angles_finder/player/dialog_position")
+
+[node name="x_axis" type="Line2D" parent="."]
+points = PackedVector2Array(-10, 480, 1300, 480)
+width = 2.0
+default_color = Color(0.980392, 0.00392157, 0.00392157, 1)
+
+[node name="y_axis" type="Line2D" parent="."]
+points = PackedVector2Array(640, -20, 640, 810)
+width = 2.0
+default_color = Color(0.156863, 0.0117647, 0.984314, 1)
+
+[node name="three" type="Node2D" parent="."]
+visible = false
+
+[node name="Line2D" type="Line2D" parent="three"]
+points = PackedVector2Array(160, 0, 1120, 960)
+width = 2.0
+default_color = Color(1, 1, 1, 1)
+
+[node name="Line2D2" type="Line2D" parent="three"]
+points = PackedVector2Array(160, 960, 1120, 0)
+width = 2.0
+default_color = Color(1, 1, 1, 1)
+
+[node name="six" type="Node2D" parent="."]
+visible = false
+
+[node name="Line2D" type="Line2D" parent="six"]
+points = PackedVector2Array(0, 210, 640, 480)
+width = 2.0
+default_color = Color(1, 1, 1, 1)
+
+[node name="Line2D4" type="Line2D" parent="six"]
+points = PackedVector2Array(320, 0, 640, 480)
+width = 2.0
+default_color = Color(1, 1, 1, 1)
+
+[node name="Line2D2" type="Line2D" parent="six"]
+points = PackedVector2Array(640, 480, 1280, 210)
+width = 2.0
+default_color = Color(1, 1, 1, 1)
+
+[node name="Line2D3" type="Line2D" parent="six"]
+points = PackedVector2Array(640, 480, 960, 0)
+width = 2.0
+default_color = Color(1, 1, 1, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+offset_right = 370.0
+offset_bottom = 170.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Number of directions"
+
+[node name="number_of_directions" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="angle_x" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/angle_x"]
+layout_mode = 2
+text = "Angle on horizontal axis (X)"
+
+[node name="angle_horiz" type="LineEdit" parent="VBoxContainer/angle_x"]
+layout_mode = 2
+
+[node name="angle_y" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/angle_y"]
+layout_mode = 2
+text = "Angle on vertical axis (Y)"
+
+[node name="angle_vert" type="LineEdit" parent="VBoxContainer/angle_y"]
+layout_mode = 2
+
+[node name="angle_diag" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/angle_diag"]
+layout_mode = 2
+text = "Angle on diagonal axes"
+
+[node name="angle_diag" type="LineEdit" parent="VBoxContainer/angle_diag"]
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="angles" type="HBoxContainer" parent="VBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="VBoxContainer/VBoxContainer/angles"]
+layout_mode = 2
+text = "Angles array"
+
+[node name="angle_array" type="TextEdit" parent="VBoxContainer/VBoxContainer/angles"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="player_animations" type="OptionButton" parent="."]
+visible = false
+offset_left = 470.0
+offset_top = 10.0
+offset_right = 638.0
+offset_bottom = 33.0
+
+[connection signal="text_changed" from="VBoxContainer/HBoxContainer/number_of_directions" to="." method="_on_number_of_directions_text_changed"]
+[connection signal="text_changed" from="VBoxContainer/angle_x/angle_horiz" to="." method="_on_angle_horiz_text_changed"]
+[connection signal="text_changed" from="VBoxContainer/angle_y/angle_vert" to="." method="_on_angle_vert_text_changed"]
+[connection signal="text_changed" from="VBoxContainer/angle_diag/angle_diag" to="." method="_on_angle_diag_text_changed"]
+[connection signal="text_changed" from="VBoxContainer/VBoxContainer/angles/angle_array" to="." method="_on_angle_diag_text_changed"]

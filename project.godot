@@ -1,0 +1,94 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Superfluous-Returnz"
+config/name_localized={
+"en": "Superfluous Returnz",
+"fr_FR": "Superflu Riteurnz"
+}
+config/version="0.0.1"
+run/main_scene="res://addons/escoria-core/game/main_scene.tscn"
+config/features=PackedStringArray("4.4", "Mobile")
+config/icon="res://game/images/interface/icon.png"
+
+[audio]
+
+buses/default_bus_layout="res://addons/escoria-core/buses/default_bus_layout.tres"
+
+[autoload]
+
+escoria="*res://addons/escoria-core/game/esc_autoload.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep_height"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/escoria-core/plugin.cfg", "res://addons/sr-dialog-simple/plugin.cfg", "res://addons/sr-ui-simplemouse/plugin.cfg")
+
+[escoria]
+
+main/command_directories=["res://addons/escoria-core/game/core-scripts/esc/commands"]
+main/game_version="0.0.1"
+main/game_start_script="res://game/start_game.esc"
+main/action_default_script="res://game/action_defaults.esc"
+main/force_quit=true
+main/text_lang="en_EN"
+main/voice_lang="en_EN"
+main/savegames_path="user://saves/"
+main/settings_path="user://"
+main/game_migration_path=""
+debug/terminate_on_warnings=false
+debug/terminate_on_errors=true
+debug/development_lang="en"
+debug/log_level="INFO"
+debug/log_file_path="user://"
+debug/crash_message="We're sorry, but the game crashed. Please send us the following files:
+
+%s"
+debug/enable_room_selector=false
+debug/room_selector_room_dir=""
+debug/enable_hover_stack_viewer=false
+debug/perform_script_analysis_at_runtime=true
+ui/game_scene="res://addons/sr-ui-simplemouse/game.tscn"
+ui/inventory_items_path="res://game/items/inventory/"
+ui/default_transition="curtain"
+ui/transition_paths=["res://addons/escoria-core/game/scenes/transitions/shaders/"]
+ui/inventory_item_size=Vector2(72, 72)
+ui/dialog_managers=["res://addons/escoria-dialog-simple/esc_dialog_simple.gd"]
+sound/master_volume=1
+sound/music_volume=1
+sound/sfx_volume=1
+sound/speech_volume=1
+sound/speech_enabled=true
+sound/speech_folder="res://speech"
+sound/speech_extension="ogg"
+platform/skip_cache=false
+platform/skip_cache.mobile=true
+ui/default_dialog_type="floating"
+dialog_simple/avatars_path="res://game/dialog_avatars"
+dialog_simple/text_time_per_letter_ms=100
+dialog_simple/text_time_per_fast_letter_ms=25
+dialog_simple/clear_text_by_click_only=false
+dialog_simple/reading_speed_in_wpm=200
+dialog_simple/left_click_action="Speed up"
+dialog_simple/stop_talking_animation_on="End of audio"
+
+[rendering]
+
+renderer/rendering_method="mobile"

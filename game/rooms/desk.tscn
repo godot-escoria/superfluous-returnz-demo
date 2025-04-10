@@ -1,0 +1,430 @@
+[gd_scene load_steps=35 format=3 uid="uid://ddlsoeh0nu5dg"]
+
+[ext_resource type="Script" uid="uid://c7fcpp72w3dnj" path="res://addons/escoria-core/game/core-scripts/esc_room.gd" id="1_6gn6i"]
+[ext_resource type="PackedScene" uid="uid://d4dsojig28vcs" path="res://game/characters/sophie.tscn" id="2_1c5ds"]
+[ext_resource type="Script" uid="uid://5pbcieq7gpdo" path="res://addons/escoria-core/game/core-scripts/esc_terrain.gd" id="2_qwppr"]
+[ext_resource type="Texture2D" uid="uid://bupooip3do6c2" path="res://game/images/backgrounds/bureau_map.png" id="3_gnty4"]
+[ext_resource type="Script" uid="uid://fnwnfflaoeqp" path="res://addons/escoria-core/game/core-scripts/esc_background.gd" id="3_ims18"]
+[ext_resource type="Texture2D" uid="uid://cmy4ns8rge54q" path="res://game/images/backgrounds/bureau.png" id="3_uwoij"]
+[ext_resource type="Script" uid="uid://dshelmw7y44qg" path="res://addons/escoria-core/game/core-scripts/esc_item.gd" id="6_kg4gr"]
+[ext_resource type="Texture2D" uid="uid://dcsl46cymt07f" path="res://game/images/scenery/bureau.png" id="7_h830k"]
+[ext_resource type="Texture2D" uid="uid://0ayruhtls8eg" path="res://game/images/scenery/chaise1.png" id="8_2fe0k"]
+[ext_resource type="Texture2D" uid="uid://bgsxuk74eq6br" path="res://game/images/objects/corbeille.png" id="8_a24ej"]
+[ext_resource type="Texture2D" uid="uid://b4odc11hotsrk" path="res://game/images/objects/tableau.png" id="10_oqqx4"]
+[ext_resource type="Texture2D" uid="uid://couliukm5f8v1" path="res://game/images/objects/petite_serrure.png" id="11_c3wm4"]
+[ext_resource type="Texture2D" uid="uid://c6hv88bhdso04" path="res://game/images/objects/plante.png" id="12_qr4sq"]
+[ext_resource type="Texture2D" uid="uid://d3ijghmsh8su" path="res://game/images/inventory/bouteille.png" id="12_uro0m"]
+[ext_resource type="Texture2D" uid="uid://b1pwn37rn1yga" path="res://game/images/objects/ordinateur.png" id="13_oqmbs"]
+[ext_resource type="Texture2D" uid="uid://davnuilkj31v1" path="res://game/images/objects/coffre_fort_ferme.png" id="14_7k8hs"]
+[ext_resource type="Texture2D" uid="uid://buex8opyc87n5" path="res://game/images/objects/bouteille.png" id="14_shp7c"]
+[ext_resource type="Texture2D" uid="uid://yr7lghptj0du" path="res://game/images/objects/coffre_fort_ouvert.png" id="15_if1th"]
+[ext_resource type="Texture2D" uid="uid://b34hswr3r2krl" path="res://game/images/objects/buste_gnu.png" id="15_jfntm"]
+[ext_resource type="Texture2D" uid="uid://baj77ukgsmlj" path="res://game/images/scenery/chaise2.png" id="16_bbion"]
+[ext_resource type="Texture2D" uid="uid://n3aa6jiaufc6" path="res://game/images/scenery/chaise3.png" id="17_53src"]
+[ext_resource type="Texture2D" uid="uid://cejmjq5e8k31a" path="res://game/images/objects/documents.png" id="18_5qkmi"]
+[ext_resource type="Texture2D" uid="uid://dbbbgdnd78f64" path="res://game/images/objects/tisonnier.png" id="19_m7hod"]
+[ext_resource type="Script" uid="uid://chu4bvqgwxuts" path="res://addons/escoria-core/game/core-scripts/esc_interaction_location.gd" id="19_r0cw4"]
+[ext_resource type="Script" uid="uid://beh3ds4eapldu" path="res://addons/escoria-core/game/core-scripts/esc_location.gd" id="21_koxl6"]
+
+[sub_resource type="NavigationPolygon" id="NavigationPolygon_ot85j"]
+vertices = PackedVector2Array(970.781, 757.969, 970.773, 757.961, 1034.47, 753.062, 1895.48, 1052.03, 33.5938, 1057.95, 42.1562, 1021.04, 802.398, 924.648, 1739.99, 899.273, 848.391, 896.352, 1274.26, 827.93, 622.172, 779.938, 165.406, 823.148, 162.602, 805.352, 893.672, 763.977, 822.109, 805.703, 844.812, 843.938, 1806.92, 875.281, 1903.56, 891.391, 1264.2, 794.75)
+polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2), PackedInt32Array(3, 4, 5, 6), PackedInt32Array(7, 3, 6, 8, 9), PackedInt32Array(10, 11, 12), PackedInt32Array(10, 12, 13), PackedInt32Array(14, 10, 13), PackedInt32Array(15, 14, 13), PackedInt32Array(16, 17, 3, 7), PackedInt32Array(13, 0, 2, 18, 9, 8, 15)])
+outlines = Array[PackedVector2Array]([PackedVector2Array(151, 796, 157, 834, 622, 790, 816, 815, 835, 847, 838, 891, 799, 915, 34, 1012, 21, 1068, 1905, 1062, 1914, 883, 1806, 865, 1739, 889, 1282, 819, 1272, 786, 1035, 743, 970, 748, 893, 754)])
+
+[sub_resource type="Animation" id="Animation_oqdvn"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("14_7k8hs")]
+}
+
+[sub_resource type="Animation" id="Animation_56flq"]
+resource_name = "closed"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("14_7k8hs")]
+}
+
+[sub_resource type="Animation" id="Animation_ge5vr"]
+resource_name = "open"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("15_if1th")]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_dsevr"]
+_data = {
+&"RESET": SubResource("Animation_oqdvn"),
+&"closed": SubResource("Animation_56flq"),
+&"open": SubResource("Animation_ge5vr")
+}
+
+[sub_resource type="Animation" id="Animation_pdbxi"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(960, 483)]
+}
+
+[sub_resource type="Animation" id="Animation_o38ao"]
+resource_name = "move_left"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(960, 483), Vector2(822, 501)]
+}
+
+[sub_resource type="Animation" id="Animation_6u7bx"]
+resource_name = "move_right"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(822, 501), Vector2(960, 483)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_27wwv"]
+_data = {
+&"RESET": SubResource("Animation_pdbxi"),
+&"move_left": SubResource("Animation_o38ao"),
+&"move_right": SubResource("Animation_6u7bx")
+}
+
+[node name="desk" type="Node2D"]
+script = ExtResource("1_6gn6i")
+global_id = "room_desk"
+esc_script = "res://game/rooms/desk.ash"
+player_scene = ExtResource("2_1c5ds")
+
+[node name="ESCBackground" type="TextureRect" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("3_uwoij")
+script = ExtResource("3_ims18")
+
+[node name="ESCTerrain" type="Node2D" parent="."]
+script = ExtResource("2_qwppr")
+scales = ExtResource("3_gnty4")
+scale_min = 1.0
+scale_max = 0.8
+player_speed_multiplier = 1.5
+metadata/_edit_lock_ = true
+
+[node name="NavigationRegion2D" type="NavigationRegion2D" parent="ESCTerrain"]
+navigation_polygon = SubResource("NavigationPolygon_ot85j")
+
+[node name="items" type="Node2D" parent="."]
+
+[node name="chair" type="Area2D" parent="items"]
+process_mode = 1
+z_index = 900
+position = Vector2(88, 634)
+script = ExtResource("6_kg4gr")
+global_id = "chair"
+combine_when_selected_action_is_in = PackedStringArray()
+inventory_texture = ExtResource("8_2fe0k")
+inventory_texture_hovered = ExtResource("8_2fe0k")
+
+[node name="Sprite2D" type="Sprite2D" parent="items/chair"]
+texture = ExtResource("8_2fe0k")
+
+[node name="desk" type="Area2D" parent="items"]
+process_mode = 1
+z_index = 919
+position = Vector2(368, 826)
+script = ExtResource("6_kg4gr")
+global_id = "desk"
+combine_when_selected_action_is_in = PackedStringArray()
+inventory_texture = ExtResource("7_h830k")
+inventory_texture_hovered = ExtResource("7_h830k")
+
+[node name="Sprite2D" type="Sprite2D" parent="items/desk"]
+texture = ExtResource("7_h830k")
+
+[node name="computer" type="Area2D" parent="items/desk"]
+process_mode = 1
+position = Vector2(-368, -826)
+script = ExtResource("6_kg4gr")
+global_id = "computer"
+combine_when_selected_action_is_in = PackedStringArray()
+hover_enabled = true
+hover_modulate = Color(0.501407, 0.501406, 0.501406, 1)
+inventory_texture = ExtResource("13_oqmbs")
+inventory_texture_hovered = ExtResource("13_oqmbs")
+
+[node name="Sprite2D" type="Sprite2D" parent="items/desk/computer"]
+position = Vector2(206, 656)
+texture = ExtResource("13_oqmbs")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="items/desk/computer"]
+polygon = PackedVector2Array(184, 559, 334, 551, 319, 653, 281, 661, 275, 719, 310, 717, 316, 746, 204, 762, 178, 737, 91, 744, 65, 710, 231, 695, 234, 666, 171, 667)
+
+[node name="bottle" type="Area2D" parent="items/desk"]
+process_mode = 1
+position = Vector2(-368, -826)
+script = ExtResource("6_kg4gr")
+global_id = "bottle"
+esc_script = "res://game/rooms/bottle.ash"
+combine_when_selected_action_is_in = PackedStringArray()
+hover_enabled = true
+hover_modulate = Color(0.501961, 0.501961, 0.501961, 1)
+inventory_texture = ExtResource("12_uro0m")
+inventory_texture_hovered = ExtResource("12_uro0m")
+
+[node name="Sprite2D" type="Sprite2D" parent="items/desk/bottle"]
+position = Vector2(358, 668)
+texture = ExtResource("14_shp7c")
+
+[node name="CollisionShape2D" type="CollisionPolygon2D" parent="items/desk/bottle"]
+polygon = PackedVector2Array(340, 726, 340, 634, 351, 621, 351, 611, 358, 605, 367, 610, 367, 623, 375, 631, 376, 725, 359, 730)
+
+[node name="documents" type="Area2D" parent="items/desk"]
+process_mode = 1
+position = Vector2(-368, -826)
+script = ExtResource("6_kg4gr")
+global_id = "documents"
+combine_when_selected_action_is_in = PackedStringArray()
+hover_enabled = true
+hover_modulate = Color(0.501961, 0.501961, 0.501961, 1)
+inventory_texture = ExtResource("18_5qkmi")
+inventory_texture_hovered = ExtResource("18_5qkmi")
+
+[node name="Sprite2D" type="Sprite2D" parent="items/desk/documents"]
+position = Vector2(534, 695)
+texture = ExtResource("18_5qkmi")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="items/desk/documents"]
+polygon = PackedVector2Array(670, 731, 675, 688, 592, 650, 509, 659, 506, 692, 462, 699, 447, 690, 386, 704, 429, 737, 466, 731, 477, 741, 550, 731, 546, 722, 577, 735)
+
+[node name="trashbin" type="Area2D" parent="items/desk"]
+process_mode = 1
+z_index = -1
+position = Vector2(380, -18)
+script = ExtResource("6_kg4gr")
+global_id = "trashbin"
+combine_when_selected_action_is_in = PackedStringArray()
+hover_enabled = true
+hover_modulate = Color(0.501407, 0.501406, 0.501406, 1)
+inventory_texture = ExtResource("8_a24ej")
+inventory_texture_hovered = ExtResource("8_a24ej")
+
+[node name="Sprite2D" type="Sprite2D" parent="items/desk/trashbin"]
+texture = ExtResource("8_a24ej")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="items/desk/trashbin"]
+polygon = PackedVector2Array(-14, -46, 0, -48, 18, -45, 36, -40, 43, -33, 30, 43, 14, 48, -10, 49, -31, 43, -36, -33, -26, -41)
+
+[node name="safe" type="Area2D" parent="items"]
+process_mode = 1
+visible = false
+position = Vector2(0, -1)
+script = ExtResource("6_kg4gr")
+global_id = "safe"
+combine_when_selected_action_is_in = PackedStringArray()
+hover_enabled = true
+hover_modulate = Color(0.501961, 0.501961, 0.501961, 1)
+inventory_texture = ExtResource("14_7k8hs")
+inventory_texture_hovered = ExtResource("14_7k8hs")
+
+[node name="Sprite2D" type="Sprite2D" parent="items/safe"]
+position = Vector2(112, 335)
+texture = ExtResource("14_7k8hs")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="items/safe"]
+libraries = {
+&"": SubResource("AnimationLibrary_dsevr")
+}
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="items/safe"]
+polygon = PackedVector2Array(15, 188, 8, 491, 52, 453, 216, 457, 205, 261, 50, 252)
+
+[node name="painting" type="Area2D" parent="items"]
+process_mode = 1
+position = Vector2(127, 357)
+script = ExtResource("6_kg4gr")
+global_id = "painting"
+combine_when_selected_action_is_in = PackedStringArray()
+hover_enabled = true
+hover_modulate = Color(0.501407, 0.501406, 0.501406, 1)
+inventory_texture = ExtResource("10_oqqx4")
+inventory_texture_hovered = ExtResource("10_oqqx4")
+
+[node name="Sprite2D" type="Sprite2D" parent="items/painting"]
+texture = ExtResource("10_oqqx4")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="items/painting"]
+polygon = PackedVector2Array(-84, -101, -82, 96, 91, 103, 83, -100, -54, -110)
+
+[node name="window" type="Area2D" parent="items"]
+process_mode = 1
+script = ExtResource("6_kg4gr")
+global_id = "window"
+combine_when_selected_action_is_in = PackedStringArray()
+hover_enabled = true
+hover_modulate = Color(0.501407, 0.501406, 0.501406, 1)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="items/window"]
+polygon = PackedVector2Array(256, 175, 261, 549, 336, 553, 331, 601, 499, 605, 531, 199, 388, 178)
+
+[node name="keyhole" type="Area2D" parent="items"]
+process_mode = 1
+position = Vector2(973, 549)
+script = ExtResource("6_kg4gr")
+global_id = "keyhole"
+combine_when_selected_action_is_in = PackedStringArray()
+hover_enabled = true
+hover_modulate = Color(0.501961, 0.501961, 0.501961, 1)
+inventory_texture = ExtResource("11_c3wm4")
+inventory_texture_hovered = ExtResource("11_c3wm4")
+
+[node name="Sprite2D" type="Sprite2D" parent="items/keyhole"]
+texture = ExtResource("11_c3wm4")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="items/keyhole"]
+polygon = PackedVector2Array(-13, -12, -13, 16, 12, 14, 12, -11)
+
+[node name="plant" type="Area2D" parent="items"]
+process_mode = 1
+position = Vector2(960, 483)
+script = ExtResource("6_kg4gr")
+global_id = "plant"
+esc_script = "res://game/rooms/plant.ash"
+combine_when_selected_action_is_in = PackedStringArray()
+hover_enabled = true
+hover_modulate = Color(0.501407, 0.501406, 0.501406, 1)
+inventory_texture = ExtResource("12_qr4sq")
+inventory_texture_hovered = ExtResource("12_qr4sq")
+
+[node name="Sprite2D" type="Sprite2D" parent="items/plant"]
+texture = ExtResource("12_qr4sq")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="items/plant"]
+polygon = PackedVector2Array(25, 120, 35, 33, 30, 26, 38, 5, 164, -36, 123, -41, 75, -34, 90, -50, 141, -81, 164, -93, 137, -86, 113, -75, 75, -65, 34, -26, 45, -55, 84, -97, 149, -121, 121, -125, 158, -153, 168, -174, 138, -163, 77, -118, 99, -154, 100, -173, 97, -175, 44, -110, 54, -141, 52, -151, 73, -220, 68, -220, 57, -198, 56, -224, 50, -216, 46, -263, 35, -206, 32, -194, 35, -240, 25, -215, 23, -234, 8, -179, -7, -240, -3, -172, -38, -255, -12, -142, -59, -197, -61, -186, -73, -194, -57, -167, -36, -146, -12, -90, -28, -101, -68, -154, -87, -167, -93, -165, -52, -108, -65, -109, -54, -94, -95, -121, -75, -97, -167, -137, -177, -132, -128, -104, -95, -92, -163, -89, -183, -83, -192, -73, -127, -83, -81, -82, -76, -76, -87, -76, -85, -68, -68, -65, -46, -40, -106, -53, -140, -55, -138, -46, -108, -40, -84, -32, -151, -25, -185, -15, -183, -6, -154, -15, -101, -18, -31, -4, 2, 31, -8, 30, 0, 51, -4, 118, -54, 125, -51, 155, -46, 159, -39, 247, -25, 256, 1, 260, 27, 258, 62, 243, 69, 155, 74, 140, 69, 123, 37, 119)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="items/plant"]
+libraries = {
+&"": SubResource("AnimationLibrary_27wwv")
+}
+
+[node name="ESCInteractionLocation" type="Marker2D" parent="items/plant"]
+position = Vector2(47, 286)
+script = ExtResource("19_r0cw4")
+
+[node name="gnustatue" type="Area2D" parent="items"]
+process_mode = 1
+position = Vector2(1540, 434)
+script = ExtResource("6_kg4gr")
+global_id = "gnustatue"
+combine_when_selected_action_is_in = PackedStringArray()
+hover_enabled = true
+hover_modulate = Color(0.501407, 0.501406, 0.501406, 1)
+inventory_texture = ExtResource("15_jfntm")
+inventory_texture_hovered = ExtResource("15_jfntm")
+
+[node name="Sprite2D" type="Sprite2D" parent="items/gnustatue"]
+texture = ExtResource("15_jfntm")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="items/gnustatue"]
+polygon = PackedVector2Array(-87, -18, -65, -25, -62, -119, -8, -124, 25, -129, 59, -115, 74, -66, 69, -4, 83, 7, 73, 17, 57, 26, 42, 27, 39, 43, 61, 56, 63, 76, 93, 78, 91, 124, 11, 128, -75, 121, -72, 75, -20, 75, -39, 59, -12, 42, -38, 32, -40, 12, -53, -7, -78, -6)
+
+[node name="poker" type="Area2D" parent="items"]
+process_mode = 1
+script = ExtResource("6_kg4gr")
+global_id = "poker"
+combine_when_selected_action_is_in = PackedStringArray()
+hover_enabled = true
+hover_modulate = Color(0.501961, 0.501961, 0.501961, 1)
+inventory_texture = ExtResource("19_m7hod")
+inventory_texture_hovered = ExtResource("19_m7hod")
+
+[node name="Sprite2D" type="Sprite2D" parent="items/poker"]
+position = Vector2(1657, 761)
+texture = ExtResource("19_m7hod")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="items/poker"]
+polygon = PackedVector2Array(1678, 687, 1693, 688, 1678, 731, 1646, 812, 1654, 837, 1630, 835, 1621, 825, 1638, 806)
+
+[node name="chair2" type="Area2D" parent="items"]
+process_mode = 1
+z_index = 4096
+position = Vector2(630, 1028)
+script = ExtResource("6_kg4gr")
+global_id = "chair2"
+combine_when_selected_action_is_in = PackedStringArray()
+inventory_texture = ExtResource("16_bbion")
+inventory_texture_hovered = ExtResource("16_bbion")
+
+[node name="Sprite2D" type="Sprite2D" parent="items/chair2"]
+texture = ExtResource("16_bbion")
+
+[node name="chair3" type="Area2D" parent="items"]
+process_mode = 1
+z_index = 4096
+position = Vector2(1168, 950)
+script = ExtResource("6_kg4gr")
+global_id = "chair3"
+combine_when_selected_action_is_in = PackedStringArray()
+inventory_texture = ExtResource("16_bbion")
+inventory_texture_hovered = ExtResource("16_bbion")
+
+[node name="Sprite2D" type="Sprite2D" parent="items/chair3"]
+texture = ExtResource("17_53src")
+
+[node name="start" type="Marker2D" parent="."]
+position = Vector2(2046, 932)
+script = ExtResource("21_koxl6")
+global_id = "start"
+is_start_location = true
+
+[node name="intro_start_point" type="Marker2D" parent="."]
+position = Vector2(1008, 846)
+script = ExtResource("21_koxl6")
+global_id = "intro_start_point"

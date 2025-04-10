@@ -1,0 +1,16 @@
+[gd_resource type="FontFile" load_steps=2 format=3 uid="uid://cstyeq4wyj77t"]
+
+[ext_resource type="FontFile" uid="uid://vbbih8y1qeto" path="res://components/sr-ui-simplemouse/fonts/caslonantique.ttf" id="1"]
+
+[resource]
+fallbacks = Array[Font]([ExtResource("1")])
+cache/0/16/0/ascent = 0.0
+cache/0/16/0/descent = 0.0
+cache/0/16/0/underline_position = 0.0
+cache/0/16/0/underline_thickness = 0.0
+cache/0/16/0/scale = 1.0
+cache/0/21/0/ascent = 0.0
+cache/0/21/0/descent = 0.0
+cache/0/21/0/underline_position = 0.0
+cache/0/21/0/underline_thickness = 0.0
+cache/0/21/0/scale = 1.0

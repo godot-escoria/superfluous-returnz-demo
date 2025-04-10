@@ -1,0 +1,67 @@
+[gd_scene load_steps=6 format=3 uid="uid://0qms6fx5siad"]
+
+[ext_resource type="Script" uid="uid://d2mlyj6637kqo" path="res://components/sr-ui-simplemouse/verbs_mouseicons.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://4c4bl8qp7mca" path="res://components/sr-ui-simplemouse/cursors/cursor.png" id="2_e7rnl"]
+[ext_resource type="Texture2D" uid="uid://dhovhxlfqomxj" path="res://components/sr-ui-simplemouse/cursors/cursor_object.png" id="3_3q1u2"]
+[ext_resource type="Texture2D" uid="uid://m8jx527po2lm" path="res://components/sr-ui-simplemouse/cursors/gauche_aller.png" id="4_5gjbi"]
+[ext_resource type="Texture2D" uid="uid://8ib8asm1ngsj" path="res://components/sr-ui-simplemouse/cursors/droite_aller.png" id="5_0yj83"]
+
+[node name="verbs_menu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="actions" type="HBoxContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -6.0
+offset_top = -1.0
+offset_right = -6.0
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="walk" type="TextureRect" parent="actions"]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 6
+texture = ExtResource("2_e7rnl")
+
+[node name="action" type="TextureRect" parent="actions"]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 6
+texture = ExtResource("3_3q1u2")
+
+[node name="exit_left" type="TextureRect" parent="actions"]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 6
+texture = ExtResource("4_5gjbi")
+
+[node name="exit_right" type="TextureRect" parent="actions"]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 6
+texture = ExtResource("5_0yj83")
+
+[node name="mouse_position" type="Control" parent="."]
+anchors_preset = 0
+mouse_filter = 2
+
+[node name="tool" type="TextureRect" parent="mouse_position"]
+layout_mode = 0
+offset_left = 48.0
+offset_top = -16.0
+offset_right = 88.0
+offset_bottom = 24.0
+mouse_filter = 2
