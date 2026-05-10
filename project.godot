@@ -8,6 +8,10 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="Superfluous-Returnz"
@@ -17,7 +21,7 @@ config/name_localized={
 }
 config/version="0.0.1"
 run/main_scene="res://addons/escoria-core/game/main_scene.tscn"
-config/features=PackedStringArray("4.4", "Mobile")
+config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://game/images/interface/icon.png"
 
 [audio]
@@ -26,7 +30,7 @@ buses/default_bus_layout="res://addons/escoria-core/buses/default_bus_layout.tre
 
 [autoload]
 
-escoria="*res://addons/escoria-core/game/esc_autoload.gd"
+escoria="*uid://dcskv8vx80gov"
 
 [display]
 
@@ -39,7 +43,7 @@ window/stretch/aspect="keep_height"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/escoria-core/plugin.cfg", "res://addons/sr-dialog-simple/plugin.cfg", "res://addons/sr-ui-simplemouse/plugin.cfg")
+enabled=PackedStringArray("res://addons/escoria-core/plugin.cfg")
 
 [escoria]
 
@@ -65,16 +69,12 @@ debug/enable_room_selector=false
 debug/room_selector_room_dir=""
 debug/enable_hover_stack_viewer=false
 debug/perform_script_analysis_at_runtime=true
-ui/game_scene="res://addons/sr-ui-simplemouse/game.tscn"
+ui/game_scene="res://components/sr-ui-simplemouse/game.tscn"
 ui/inventory_items_path="res://game/items/inventory/"
 ui/default_transition="curtain"
 ui/transition_paths=["res://addons/escoria-core/game/scenes/transitions/shaders/"]
 ui/inventory_item_size=Vector2(72, 72)
 ui/dialog_managers=["res://addons/escoria-dialog-simple/esc_dialog_simple.gd"]
-sound/master_volume=1
-sound/music_volume=1
-sound/sfx_volume=1
-sound/speech_volume=1
 sound/speech_enabled=true
 sound/speech_folder="res://speech"
 sound/speech_extension="ogg"
@@ -88,6 +88,11 @@ dialog_simple/clear_text_by_click_only=false
 dialog_simple/reading_speed_in_wpm=200
 dialog_simple/left_click_action="Speed up"
 dialog_simple/stop_talking_animation_on="End of audio"
+sound/master_volume=1
+sound/music_volume=1
+sound/sfx_volume=1
+sound/ambient_volume=1
+sound/speech_volume=1
 
 [rendering]
 

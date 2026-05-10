@@ -1,20 +1,15 @@
 @tool
 @icon("res://addons/escoria-core/design/esc_room.svg")
-## A room in an Escoria based game
+## A room in an Escoria based game.
 extends Node2D
 class_name ESCRoom
 
 
-# Debugging displays for a room
-# NONE: No debug display
-# CAMERA_LIMITS: Display the camera limits
+## Debugging displays for a room.
 enum EditorRoomDebugDisplay {
-	NONE,
-	CAMERA_LIMITS
+	NONE, # No debug display
+	CAMERA_LIMITS # Display the camera limits
 }
-
-const ESC_BACKGROUND_NAME = "escbackground"
-
 
 ## The global id of this room
 @export var global_id: String = ""
@@ -29,26 +24,27 @@ const ESC_BACKGROUND_NAME = "escbackground"
 @export var camera_limits: Array = [Rect2()]: # (Array, Rect2)
 	set = set_camera_limits
 
-## The room's debug display mode.
-## Camera Limits: show a colored frame for each camera limit of the room.
+## The room's debug display mode.[br]
+## Camera Limits: show a colored frame for each camera limit of the room.[br]
 ## None: no debug display
 @export var editor_debug_mode: EditorRoomDebugDisplay = EditorRoomDebugDisplay.NONE:
 	set = set_editor_debug_mode
 
 
-# The player scene instance
+## Container of the player scene instance.
 var player
 
-# The player camera
+## Container of player camera
 var player_camera: ESCCamera
 
-# The game scene instance
+## Container of game scene instance
 var game
 
-# Compiled ESCScript
+## Container of compiled ESCScript
 var compiled_script: ESCScript
 
-# Whether automatic transition are enabled or not
+## Whether automatic transition are enabled or not. This is modified by
+## the Room Manager.
 var enabled_automatic_transitions = true
 
 # Whether this room was run directly with Play Scene (F6)
@@ -78,6 +74,8 @@ func _ready():
 	_tool_default_font = temp_control.get_theme_default_font()
 	temp_control.queue_free()
 
+	child_entered_tree.connect(_on_child_entered_tree)
+
 	if Engine.is_editor_hint():
 		_connect_location_nodes()
 		_validate_start_locations()
@@ -91,7 +89,6 @@ func _ready():
 			move_child(child, 0)
 	if not found_escbackground:
 		var esc_bg = ESCBackground.new()
-		esc_bg.name = ESC_BACKGROUND_NAME
 		if not camera_limits.is_empty():
 			esc_bg.set_size(camera_limits.front().size)
 		add_child(esc_bg)
@@ -128,27 +125,67 @@ func _draw():
 			16,
 			camera_limits_colors[i])
 
+## Escoria editor plugin:[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |new_node|`Node`|Child node that entered the room's scene tree.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
+func _on_child_entered_tree(new_node: Node):
+	if Engine.is_editor_hint() and new_node is ESCLocation:
+			_connect_location_nodes()
 
-# Listen for any signals from ESCLocation indicating that the is_start_location attribute
-# has been set/unset in order to update start location validation.
+## Escoria editor plugin: Listen for any signals from ESCLocation indicating that the is_start_location attribute has been set/unset in order to update start location validation.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _connect_location_nodes() -> void:
+	if not Engine.is_editor_hint():
+		return
 	_connect_location_nodes_in_tree(self)
 
-
-func _connect_location_nodes_in_tree(node: Node):
+## Escoria editor plugin:[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |node|`Node`|Node whose descendants should be scanned for `ESCLocation` children.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
+func _connect_location_nodes_in_tree(node: Node) -> void:
 	for n in node.get_children():
 		if n is ESCLocation:
-			if not n.is_connected("is_start_location_set", Callable(self, "_validate_start_locations")):
-				n.connect("is_start_location_set", Callable(self, "_validate_start_locations"))
+			if not n.is_connected("editor_is_start_location_set",_validate_start_locations):
+				n.connect("editor_is_start_location_set", _validate_start_locations)
 
 		if n.get_child_count() > 0:
 			_connect_location_nodes_in_tree(n)
 
 
-# Validate that we only have one start location for this scene. If we don't, call it out in the
-# scene tree via configuration warnings.
-#
-# We may have to ignore a node if it's being removed/deleted from the scene tree.
+## Validate that we only have one start location for this scene. If we don't, call it out in the scene tree via configuration warnings. We may have to ignore a node if it's being removed/deleted from the scene tree.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |to_ignore|`ESCLocation`|Location node that should be excluded from validation (usually the one being removed).|no|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _validate_start_locations(to_ignore: ESCLocation = null):
 	var esc_locations: Array = _find_esc_locations(self)
 	var num_start_locations: int = 0
@@ -163,9 +200,20 @@ func _validate_start_locations(to_ignore: ESCLocation = null):
 		if n == to_ignore:
 			continue
 
-		n.set_multiple_locations_exist(n.is_start_location and num_start_locations > 1)
+		n.set_multiple_start_locations_exist(n.is_start_location and num_start_locations > 1)
 
 
+## Escoria plugin for editor: get the list of ESCLocation nodes in the room. ####[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |node|`Node`|Root node to inspect when searching for `ESCLocation` instances.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `Array` value. (`Array`)
 func _find_esc_locations(node: Node) -> Array:
 	var esc_locations: Array = []
 
@@ -185,7 +233,15 @@ func _find_esc_locations(node: Node) -> Array:
 #
 # - p_camera_limits: An array of Rect2Ds as camera limits
 func set_camera_limits(p_camera_limits: Array) -> void:
-	camera_limits = p_camera_limits
+	var fixed_camera_limits: Array = []
+	var viewport_height = ProjectSettings.get_setting("display/window/size/viewport_height")
+	for cam_limit in p_camera_limits:
+		var fixed_camera_limit = Rect2(cam_limit)
+		if fixed_camera_limit.size.y < viewport_height:
+			fixed_camera_limit.size.y = viewport_height
+		fixed_camera_limits.append(fixed_camera_limit)
+	camera_limits = fixed_camera_limits
+
 	queue_redraw()
 
 

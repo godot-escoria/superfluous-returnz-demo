@@ -1,5 +1,15 @@
+## ASHES language scanner.
+##
+## This is the first link in the ASHES compiler toolchain, and takes in ASHES
+## script as text in order to provide a list of tokens to be handled by the
+## ASHES parser.
 extends RefCounted
 class_name ESCScanner
+
+
+## In ASHES, an identifier starting with `$` is interpreted as a lookup in
+## `ESCObjectManager.get_object()` with the value after the `$`.
+const GLOBAL_ID_PREFIX: String = "$"
 
 
 var _tokens: Array = []
@@ -63,6 +73,17 @@ func _init():
 	_indent_level_stack.push_front(0)
 
 
+## Sets the ASHES source as a string. This is the source that will be scanned and turned into tokens.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |source|`String`|Raw ASHES source text to tokenize.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func set_source(source: String) -> void:
 	# If we don't have a newline terminator, then we add one to be safe.
 	if not source.ends_with("\n"):
@@ -71,14 +92,43 @@ func set_source(source: String) -> void:
 	_source = source
 
 
+## Sets the path of the file containing the source to be scanned.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |filename|`String`|Path associated with the source (used for error reporting).|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func set_filename(filename: String) -> void:
 	_filename = filename
 
 
+## The path of the file containing the source to be scanned.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the path of the file containing the source to be scanned. (`String`)
 func get_filename() -> String:
 	return _filename
 
 
+## Entry point for the scanner. Begins scanning the source and returns an array of tokens corresponding to the source. `set_source` must be called prior to calling this method.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `Array` value. (`Array`)
 func scan_tokens() -> Array:
 	while not _at_end():
 		_start = _current
@@ -218,8 +268,17 @@ func _is_alphanumeric(c: String) -> bool:
 
 
 func _identifier() -> void:
-	while _is_alphanumeric(_peek()):
-		_advance()
+	# Identifiers starting with '$' are used as shorthand for global IDs and
+	# are allowed to contain hyphens (e.g., `$closet-door`). Other identifiers
+	# still treat '-' as the subtraction operator.
+	var allow_hyphen_in_identifier: bool = _source[_start] == GLOBAL_ID_PREFIX
+
+	while true:
+		var current_char = _peek()
+		if _is_alphanumeric(current_char) or (allow_hyphen_in_identifier and current_char == '-'):
+			_advance()
+		else:
+			break
 
 	var text: String = _source.substr(_start, _current - _start)
 	var type = _keywords.get(text)

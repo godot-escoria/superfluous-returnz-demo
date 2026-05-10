@@ -1,64 +1,44 @@
-# An option of an ESC dialog
-extends ESCStatement
+## A single option used as part of a dialog.
+##
+## `ESCDialog` makes use of these when assembling an actual dialog in Escoria.
 class_name ESCDialogOption
+extends ESCStatement
 
 
-# Regex that matches dialog option lines
-const REGEX = \
-	'^[^-]*- (?<trans_key>[^:]+)?:?"' +\
-	'(?<option>[^"]+)"( \\[(?<conditions>[^\\]]+)\\])?$'
-
-
-# Option displayed in the HUD
+## Option text displayed in the HUD.
 var option: String:
 	get = get_translated_option
 
-# Maps back to the parsed source option.
+## Explicit translation key for the option text.
+var translation_key: String = ""
+
+## Maps back to the parsed source option.
 var source_option
 
-# Conditions to show this dialog
-var conditions: Array = []
-
+## Whether this option is valid.
 var _is_valid: bool:
 	set = set_is_valid,
 	get = is_valid
 
-# Create a dialog option from an ESC string
-#
-# #### Parameter
-# - option_string: ESC string for the dialog option
-func load_string(option_string: String):
-	var option_regex = RegEx.new()
-	option_regex.compile(REGEX)
 
-	if option_regex.search(option_string):
-		for result in option_regex.search_all(option_string):
-			if "option" in result.names:
-				var _trans_key = ""
-				if "trans_key" in result.names:
-					_trans_key = "%s:" % \
-							ESCUtils.get_re_group(result, "trans_key")
-				self.option = "%s%s" % [
-					_trans_key,
-					ESCUtils.get_re_group(result, "option")
-				]
-			if "conditions" in result.names:
-				for condition_text in ESCUtils.get_re_group(
-							result,
-							"conditions"
-						).split(","):
-					self.conditions.append(
-						ESCCondition.new(condition_text.strip_edges())
-					)
-	else:
-		escoria.logger.error(
-			self,
-			"Invalid dialog option detected: %s." % option_string +
-				"Dialog option regexp didn't match"
-		)
+## The translated version of the option, if one exists; otherwise, the default text is returned.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the translated version of the option, if one exists; otherwise, the default text is returned. (`String`)
+func get_translated_option() -> String:
+	if not translation_key.is_empty():
+		var translated_text = tr(translation_key)
 
+		if translation_key != translated_text:
+			return translated_text
 
-func get_translated_option():
+		return option
+
 	# Check if text has a key
 	if ":" in option:
 		var splitted_text = option.split(":")
@@ -74,14 +54,29 @@ func get_translated_option():
 	return option
 
 
-# Check, if conditions match
+## Whether this dialog option is valid. Note: this value isn't currently used as part of any meaningful validation checks.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns whether this dialog option is valid. Note: this value isn't currently used as part of any meaningful validation checks. (`bool`)
 func is_valid() -> bool:
-#	for condition in self.conditions:
-#		if not (condition as ESCCondition).run():
-#			return false
-#	return true
 	return _is_valid
 
 
+## Sets whether the option is valid, although this value isn't currently used as part of any useful checks.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |value|`bool`|`true` to mark the option as valid; `false` to invalidate it.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func set_is_valid(value: bool) -> void:
 	_is_valid = value

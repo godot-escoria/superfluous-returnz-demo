@@ -1,139 +1,179 @@
-# This is Escoria's singleton script.
-# It holds accessors to some utils, such as Escoria's logger.
-
 extends Node
+## This is Escoria's singleton script.
+## It holds accessors to some utils, such as Escoria's logger.
 
-
-# Signal sent when Escoria is paused
+## Signal sent when Escoria is paused[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
 signal paused
 
-# Signal sent when Escoria is resumed from pause
+## Signal sent when Escoria is resumed from pause[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
 signal resumed
 
 
-# Current game state
-# * DEFAULT: Common game function
-# * DIALOG: Game is playing a dialog
-# * WAIT: Game is waiting
+## Current game state
+## * DEFAULT: Common game function
+## * DIALOG: Game is playing a dialog
+## * WAIT: Game is waiting
+## * LOADING: Game is currently loading
 enum GAME_STATE {
 	DEFAULT,
 	DIALOG,
 	WAIT,
-	LOADING
+	LOADING,
+	PAUSED
 }
 
 
-# Audio bus indices.
+## Master audio bus
 const BUS_MASTER = "Master"
+
+## SFX audio bus
 const BUS_SFX = "SFX"
+
+## Music audio bus
 const BUS_MUSIC = "Music"
+
+## Speech audio bus
 const BUS_SPEECH = "Speech"
+
+## Ambient sound audio bus
+const BUS_AMBIENT = "Ambient"
 
 # Path to camera scene
 const CAMERA_SCENE_PATH = "res://addons/escoria-core/game/scenes/camera_player/camera.tscn"
 
 
 # Logger class
-const Logger = preload("res://addons/escoria-core/tools/logging/esc_logger.gd")
+const EscLogger = preload("res://addons/escoria-core/tools/logging/esc_logger.gd")
 
-# Group for ESCItem's that can be collided with in a scene. Used for quick
-# retrieval of such nodes to easily change their attributes at the same time.
+## Group for ESCItem's that can be collided with in a scene. Used for quick[br]
+## retrieval of such nodes to easily change their attributes at the same time.
 const GROUP_ITEM_CAN_COLLIDE = "item_can_collide"
 
-# Group for ESCItem's that are triggers
+## Group for ESCItem's that are triggers
 const GROUP_ITEM_TRIGGERS = "item_triggers"
 
 
 # Logger instance
-var logger = Logger.ESCLoggerFile.new()
+var logger := EscLogger.ESCLoggerFile.new()
 
-# ESC Compiler
-var esc_compiler = ESCCompiler.new()
+## ESC Compiler instance
+var esc_compiler: ESCCompiler = ESCCompiler.new()
 
-# ESC Object Manager
-var object_manager = ESCObjectManager.new()
+## ESC Object Manager instance
+var object_manager: ESCObjectManager
 
-# ESC Room Manager
-var room_manager = ESCRoomManager.new()
+## ESC Room Manager instance
+var room_manager: ESCRoomManager = ESCRoomManager.new()
 
-# ESC Dependency Injector
-var di = ESCDependencyInjector.new()
+## ESC Dependency Injector
+var di: ESCDependencyInjector = ESCDependencyInjector.new()
 
-# Terrain of the current room
-var room_terrain
-
-# The inventory manager instance
+## Inventory manager instance
 var inventory_manager: ESCInventoryManager
 
-# The action manager instance
+## Action manager instance
 var action_manager: ESCActionManager
 
-# ESC Event manager instance
+## Event manager instance
 var event_manager: ESCEventManager
 
-# ESC globals registry instance
+## Globals registry instance
 var globals_manager: ESCGlobalsManager
 
-# ESC command registry instance
+## ASHES command registry instance
 var command_registry: ESCCommandRegistry
 
-# Manager of game settings (resolution, sound, etc)
+## Manager of game settings (resolution, sound, etc)
 var settings_manager: ESCSettingsManager
 
-# Resource cache handler
+## Resource cache handler
 var resource_cache: ESCResourceCache
 
-# Dialog player instantiator. This instance is called directly for dialogs.
+## Dialog player instantiator. This instance is called directly for dialogs.
 var dialog_player: ESCDialogPlayer
 
-# ESCScript interpreter factory
+## ESCScript interpreter factory instance
 var interpreter_factory: ESCInterpreterFactory
 
-# Inventory scene
-var inventory
-
-# The main scene
-var main
-
-# The escoria inputs manager
+## Inputs manager instance
 var inputs_manager: ESCInputsManager
 
-# Savegames and settings manager
+## Savegames and settings manager
 var save_manager: ESCSaveManager
 
-# The game scene loaded
+## The game scene loaded
 var game_scene: ESCGame
 
-# The main player camera
+## The main player camera
 var player_camera: ESCCamera
 
-# The compiled start script loaded from ProjectSettings
-# escoria/main/game_start_script
+## The compiled start script loaded from ProjectSettings
+## escoria/main/game_start_script
 var start_script: ESCScript
 
-# The "fallback" script to use when an action is tried on an item that hasn't
-# been explicitly scripted.
+## The "fallback" script to use when an action is tried on an item that hasn't
+## been explicitly scripted.
 var action_default_script: ESCScript
 
-# Whether we ran a room directly from editor, not a full game
+## Whether we ran a room directly from editor, not a full game
 var is_direct_room_run: bool = false
 
-# Whether we're quitting the game
+## Whether we're quitting the game
 var is_quitting: bool = false
 
-# Whether we're creating a new game
+## Terrain of the current room
+var room_terrain
+
+## Inventory scene
+var inventory
+
+## The main scene
+var main
+
+## Whether Escoria is creating a new game
 var creating_new_game: bool = false
-var temp: int = 0
+#var temp: int = 0
 
-# The game resolution
-@onready var game_size = get_viewport().size
+## Game actual resolution obtained from viewport.
+@onready var game_size = Vector2(
+	ProjectSettings.get_setting("display/window/size/viewport_width"),
+	ProjectSettings.get_setting("display/window/size/viewport_height"))
 
-# The current state of the game
+## Current state of Escoria (GAME_STATE enum)
 @onready var current_state = GAME_STATE.DEFAULT
 
-
-# Ready function
+## Ready function. Instantiates the main scene if running a room directly.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _ready():
+	init_main_scene()
+
+## Initializes the Escoria main scene as child of the Escoria autoloaded scene.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
+func init_main_scene() -> void:
 	# We check if we run the full game or a room scene directly
 	if not get_tree().current_scene is ESCMain:
 		# Running a room scene. We need to instantiate the main scene ourselves
@@ -143,9 +183,15 @@ func _ready():
 		add_child(main_scene)
 
 
-# Get the Escoria node. That node gives access to the Escoria scene that's
-# instanced by the main_scene (if full game is run) or by this autoload if
-# room is run directly.
+## Get the Escoria node. That node gives access to the Escoria scene that's instanced by the main_scene (if full game is run) or by this autoload if room is run directly.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func get_escoria():
 	# We check if we run the full game or a room scene directly
 	if get_tree().current_scene is ESCMain:
@@ -154,10 +200,17 @@ func get_escoria():
 		return get_node("main_scene").escoria_node
 
 
-# Pauses or unpause the game
-#
-# #### Parameters
-# - p_paused: if true, pauses the game. If false, unpauses the game.
+## Pauses or unpause the game[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |p_paused|`bool`|if true, pauses the game. If false, unpauses the game.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func set_game_paused(p_paused: bool):
 	if p_paused:
 		paused.emit()
@@ -169,13 +222,27 @@ func set_game_paused(p_paused: bool):
 	if is_instance_valid(scene_tree):
 		scene_tree.paused = p_paused
 
-
-# Called from main menu's "new game" button
+## Called from main menu's "new game" button.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func new_game():
 	get_escoria().new_game()
 
-
-# Called from main menu's "quit" button
+## Called from main menu's "quit" button.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func quit():
 	is_quitting = true
 	get_escoria().quit()

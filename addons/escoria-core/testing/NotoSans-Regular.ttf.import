@@ -2,7 +2,7 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://yiebp26411cr"
+uid="uid://el1rp51n7kpd"
 path="res://.godot/imported/NotoSans-Regular.ttf-3d2825f96eb34e3bdf9d923048c8a54f.fontdata"
 
 [deps]
@@ -21,8 +21,9 @@ msdf_pixel_range=8
 msdf_size=48
 allow_system_fallback=true
 force_autohinter=false
+modulate_color_glyphs=false
 hinting=1
-subpixel_positioning=1
+subpixel_positioning=4
 keep_rounding_remainders=true
 oversampling=0.0
 Fallbacks=null

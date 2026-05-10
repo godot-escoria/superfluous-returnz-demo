@@ -1,0 +1,83 @@
+[gd_scene load_steps=9 format=3 uid="uid://ccuroi47r5yrl"]
+
+[ext_resource type="Texture2D" uid="uid://crv5q2cm67trm" path="res://addons/escoria-wizard/graphics/background.png" id="1"]
+[ext_resource type="PackedScene" uid="uid://cmd72pi6txw2v" path="res://addons/escoria-wizard/CharacterCreator.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://beawklamapteq" path="res://addons/escoria-wizard/ItemCreator.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://b72fr6t0ed4s0" path="res://addons/escoria-wizard/RoomCreator.tscn" id="4"]
+[ext_resource type="Script" uid="uid://c21ngbfgf3gcp" path="res://addons/escoria-wizard/escoria_wizard.gd" id="38"]
+[ext_resource type="Texture2D" uid="uid://5oseq417h0ch" path="res://addons/escoria-wizard/graphics/character.png" id="40"]
+[ext_resource type="Texture2D" uid="uid://6va32hw42yv" path="res://addons/escoria-wizard/graphics/room.png" id="42"]
+[ext_resource type="Texture2D" uid="uid://cglfsrifcc8is" path="res://addons/escoria-wizard/graphics/inventory.png" id="44"]
+
+[node name="root" type="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 10.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("38")
+
+[node name="background" type="TextureRect" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource("1")
+expand_mode = 1
+stretch_mode = 1
+
+[node name="Menu" type="MarginContainer" parent="."]
+layout_mode = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="Menu"]
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="Menu/CenterContainer"]
+layout_mode = 2
+theme_override_constants/v_separation = 20
+
+[node name="NewRoom" type="Button" parent="Menu/CenterContainer/GridContainer"]
+layout_mode = 2
+text = "Room Creator"
+icon = ExtResource("42")
+
+[node name="CharacterCreator" type="Button" parent="Menu/CenterContainer/GridContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 5
+text = "Character Creator"
+icon = ExtResource("40")
+
+[node name="InventoryItem" type="Button" parent="Menu/CenterContainer/GridContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 5
+text = "Item Creator"
+icon = ExtResource("44")
+
+[node name="InformationWindows" type="Control" parent="Menu"]
+visible = false
+layout_mode = 2
+
+[node name="generic_error_window" type="AcceptDialog" parent="Menu/InformationWindows"]
+dialog_text = "Warning!
+
+Exporting your character will fail when
+running the character creator directly rather than
+as a plugin.
+
+Please open this as a plugin."
+
+[node name="RoomCreator" parent="." instance=ExtResource("4")]
+visible = false
+layout_mode = 2
+
+[node name="CharacterCreator" parent="." instance=ExtResource("2")]
+visible = false
+layout_mode = 2
+
+[node name="ItemCreator" parent="." instance=ExtResource("3")]
+visible = false
+layout_mode = 2
+
+[connection signal="pressed" from="Menu/CenterContainer/GridContainer/NewRoom" to="." method="NewRoom_pressed"]
+[connection signal="pressed" from="Menu/CenterContainer/GridContainer/CharacterCreator" to="." method="CharacterCreator_pressed"]
+[connection signal="pressed" from="Menu/CenterContainer/GridContainer/InventoryItem" to="." method="InventoryItem_pressed"]

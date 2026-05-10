@@ -1,10 +1,13 @@
-# The descriptor of the arguments of an ESC command
+## Describes the arguments of commands that extend `ESCBaseCommand`.
 extends RefCounted
 class_name ESCCommandArgumentDescriptor
 
-# As the get_type command was deprecated with Godot 2.x w we need a way to determine
-# variable types. Ideally these wouldn't be hardcoded but there's no GDScript 3.x command to
-# turn a type back to its name.
+
+## As the get_type command was deprecated with Godot 2.x w we need a way to determine
+## variable types. Ideally these wouldn't be hardcoded but there's no GDScript 3.x command to
+## turn a type back to its name.[br]
+##[br]
+## TODO: With Escoria having been ported to Godot 4, this concept will need to be revisited.
 const GODOT_TYPE_LIST = ["nil", "bool", "int", "real",  "string", \
 	"vector2", "rect2", "vector3",  "matrix32", "plane", "quat", \
 	"aabb", "matrix3",  "transform", "color", "image", "node_path", \
@@ -13,34 +16,47 @@ const GODOT_TYPE_LIST = ["nil", "bool", "int", "real",  "string", \
 	"vector2_array", "vector3_array", "color_array", "max"]
 
 
-# Maximum number of total arugments the command can handle
+## Maximum number of total arugments the command can handle
 var max_args: int = 0
 
-# Number of required arguments the command expects
+## Number of required arguments the command expects
 var min_args: int = 0
 
-# The types the arguments as TYPE_ constants. If the command is called with
-# more arguments than there are entries in the types array, the additional
-# arguments will be checked against the last entry of the types array.
+## The types the arguments as TYPE_ constants. If the command is called with
+## more arguments than there are entries in the types array, the additional
+## arguments will be checked against the last entry of the types array.
 var types: Array = []
 
-# The default values for the arguments
+## The default values for the arguments
 var defaults: Array = []
 
-# Whether to strip quotes on specific arguments
+## Whether to strip quotes on specific arguments
 var strip_quotes: Array = []
 
-# Whether the final argument is a series of varargs
+## Whether the final argument is a series of varargs
 var has_varargs: bool = false
 
-# The filename from which the relevant command is being called, if available.
+## The filename from which the relevant command is being called, if available.
 var filename: String = ""
 
-# The line number from the file the relevant command is being called from.
+## The line number from the file the relevant command is being called from.
 var line_number: int = 0
 
-
-# Initialize the descriptor
+## Initializes the descriptor.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |p_min_args|`int`|Minimum number of required arguments.|no|[br]
+## |p_types|`Array`|Array of argument types.|no|[br]
+## |p_defaults|`Array`|Array of default values for arguments.|no|[br]
+## |p_strip_quotes|`Array`|Array indicating whether to strip quotes.|no|[br]
+## |p_has_varargs|`bool`|Whether the final argument is a series of varargs.|no|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _init(
 	p_min_args: int = 0,
 	p_types: Array = [],
@@ -56,7 +72,17 @@ func _init(
 	has_varargs = p_has_varargs
 
 
-# Combine the default argument values with the given arguments
+## Combines the default argument values with the given arguments.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |arguments|`Array`|an array of arguments to pass in to the command, with the array's order corresponding to the order of the arguments the command expects. If the number of arguments passed in is fewer than the maximum number of arguments the command can handle, default values are used for those arguments not passed in.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `Array` value. (`Array`)
 func prepare_arguments(arguments: Array) -> Array:
 	var complete_arguments = defaults
 	var varargs = []
@@ -98,7 +124,18 @@ func prepare_arguments(arguments: Array) -> Array:
 	return complete_arguments
 
 
-# Validate whether the given arguments match the command descriptor
+## Validates whether the given arguments match the command descriptor.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |command|`String`|the name of the command; used for logging purposes.|yes|[br]
+## |arguments|`Array`|the arguments to be passed to the command|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `bool` value. (`bool`)
 func validate(command: String, arguments: Array) -> bool:
 	var required_args_count: int = _count_leading_non_null_values(arguments, min_args)
 
@@ -166,17 +203,31 @@ func validate(command: String, arguments: Array) -> bool:
 	return true
 
 
+## A string with the file and line number for error reporting.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a string with the file and line number for error reporting. The error info string. (`String`)
 func _get_error_info() -> String:
 	return "(File: \"%s\", line %s.)" % [filename, line_number]
 
 
-# Check whether the given argument is of the given type
-#
-# #### Parameters
-#
-# - argument: Argument to test
-# - type: Type to check
-# *Returns* Whether the argument is of the given type
+## Checks whether the given argument is of the given type.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |argument|`Variant`|Argument to test.|yes|[br]
+## |type|`int`|Type to check.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns Whether the argument is of the given type. (`bool`)
 func _is_type(argument, type: int) -> bool:
 	if typeof(argument) == TYPE_FLOAT:
 		if int(argument) == argument and type == TYPE_INT:
@@ -188,16 +239,18 @@ func _is_type(argument, type: int) -> bool:
 	return typeof(argument) == type
 
 
-# Counts the number of non-null values that exist at the beginning of the array up
-# to a specified index.
-#
-# #### Parameters
-#
-# - array_to_check: Array to check for leading non-null values
-# - max_index: Maximum (inclusive) index to check in array_to_check
-#
-# *Returns* the total number of entries at the start of
-# array_to_check that are not null
+## Counts the number of non-null values that exist at the beginning of the array up to a specified index.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |array_to_check|`Array`|Array to check for leading non-null values.|yes|[br]
+## |max_index|`int`|Maximum (inclusive) index to check in array_to_check.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the total number of entries at the start of array_to_check that are not null. (`int`)
 func _count_leading_non_null_values(array_to_check: Array, max_index: int) -> int:
 	if array_to_check == null or max_index < 0:
 		return 0

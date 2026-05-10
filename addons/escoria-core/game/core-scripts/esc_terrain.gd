@@ -5,11 +5,11 @@ extends Node2D
 class_name ESCTerrain
 
 
-# Logger class
-const Logger = preload("res://addons/escoria-core/tools/logging/esc_logger.gd")
+## Logger class reference
+const EscLogger = preload("res://addons/escoria-core/tools/logging/esc_logger.gd")
 
 
-# Visualize scales or the lightmap for debugging purposes
+## Visualize scales or lightmap for debugging purposes if the editor
 enum DebugMode {
 	NONE,
 	SCALES,
@@ -66,32 +66,39 @@ enum DebugMode {
 @export_group("Debug display")
 
 
-## Debug display mode.
-## None: no debug display
-## Scales: displays the scales map
+## Debug display mode.[br]
+## None: no debug display[br]
+## Scales: displays the scales map[br]
 ## Lightmap: displays the lightmap
 @export var editor_debug_mode = DebugMode.NONE: # (int, "None", "Scales", "Lightmap")
 		set = _set_editor_debug_mode
 
 @export_group("","")
 
-# The currently active navigation polygon
+## The currently active navigation polygon
 var current_active_navigation_instance: NavigationRegion2D = null
 
-# Currently visualized texture for debug mode
+## Currently visualized texture for debug mode
 var _texture = null
 
-# The image from the lightmap texture
+## The image from the lightmap texture
 var _lightmap_data
 
-# Prohibits multiple calls to update_texture
+## Prohibits multiple calls to update_texture
 var _texture_in_update = false
 
-# Logger instance
-@onready var logger = Logger.ESCLoggerFile.new()
+## Logger instance
+@onready var logger = EscLogger.ESCLoggerFile.new()
 
-# Set a reference to the active navigation polygon, register to Escoria
-# and update the texture
+## Ready method. Sets a reference to the active navigation polygon, register to Escoria and update the texture[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _ready():
 	connect("child_entered_tree", Callable(self, "_check_multiple_enabled_navpolys"))
 	connect("child_exiting_tree", Callable(self, "_check_multiple_enabled_navpolys").bind(true))
@@ -102,10 +109,15 @@ func _ready():
 	_update_texture()
 
 
-# Returns all NavigationPolygonInstances defined as children of ESCTerrain in an Array.
-#
-# **Returns**
-# A list of NavigationPolygons nodes
+## All NavigationPolygonInstances defined as children of ESCTerrain in an Array.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns all NavigationPolygonInstances defined as children of ESCTerrain in an Array. (`Array`)
 func get_children_navpolys() -> Array:
 	var navpolys: Array = []
 	for n in get_children():
@@ -114,16 +126,23 @@ func get_children_navpolys() -> Array:
 	return navpolys
 
 
-# Checks whether multiple navigation polygons are enabled.
-# Shows a warning in the terminal if this happens.
+## Checks whether multiple navigation polygons are enabled.
+## Shows a warning in the terminal if this happens.[br]
 # TODO: change this "simple" console log for an editor warning
 # by overriding Node._get_configuration_warning() after we get rid of
 # deprecated Navigation2D.
-#
-# #### Parameters
-#
-# - node: if this method is triggered by child_entered_tree or
-# child_exited_tree signals, parameter is the added node.
+## Validates that only one navigation polygon is enabled at a time, logging a warning if multiple are active.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |node|`Node`|if this method is triggered by child_entered_tree or child_exited_tree signals, parameter is the added node.|no|[br]
+## |is_exiting|`bool`|`true` when the node is leaving the scene tree and should be ignored.|no|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _check_multiple_enabled_navpolys(node: Node = null, is_exiting: bool = false) -> void:
 	var navigation_enabled_found = false
 	if (node != null
@@ -155,61 +174,99 @@ func _check_multiple_enabled_navpolys(node: Node = null, is_exiting: bool = fals
 				current_active_navigation_instance = n
 
 
-# Return the Color of the lightmap pixel for the specified position
-#
-# #### Parameters
-#
-# - pos: Position to calculate lightmap for
-# **Returns** The color of the given point
+## Return the Color of the lightmap pixel for the specified position.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |pos|`Vector2`|Position to calculate lightmap for.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `Color` value. (`Color`)
 func get_light(pos: Vector2) -> Color:
 	if lightmap == null or lightmap.get_image().is_empty():
 		return Color(1, 1, 1, 1)
 	return _get_color(lightmap.get_image(), pos) * lightmap_modulate
 
 
-# Calculate the scale inside the scale range for a given scale factor
-#
-# #### Parameters
-#
-# - factor: The factor for the scaling according to the scale map
-# **Returns** The scaling
+## Calculate the scale inside the scale range for a given scale factor.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |factor|`float`|The factor for the scaling according to the scale map|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `Vector2` value. (`Vector2`)
 func get_scale_range(factor: float) -> Vector2:
 	factor = scale_min + (scale_max - scale_min) * factor
 	return Vector2(factor, factor)
 
 
-# Get the terrain scale factor for a given position
-#
-# #### Parameters
-#
-# - pos: The position to calculate for
-# **Returns** The scale factor for the given position
+## Get the terrain scale factor for a given position[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |pos|`Vector2`|The position to calculate for|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `float` value. (`float`)
 func get_terrain(pos: Vector2) -> float:
 	if scales == null || scales.get_image().is_empty():
 		return 1.0
 	return _get_color(scales.get_image(), pos).v
 
 
-# Small helper to get the color of an image at a position
+## Small helper to get the color of an image at a position[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |image|`Image`|image to search the position in|yes|[br]
+## |pos|`Vector2`|The position to calculate for|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `Color` value. (`Color`)
 func _get_color(image: Image, pos: Vector2) -> Color:
 	return image.get_pixel(pos.x, pos.y)
 
 
-# Set the bitmap scaling
-#
-# #### Parameters
-#
-# - p_scale: Scale to set
+## Set the bitmap scaling[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |p_scale|`Vector2`|Scale to set|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _set_bm_scale(p_scale: Vector2):
 	bitmaps_scale = p_scale
 	_update_texture()
 
 
-# Set the lightmap texture
-#
-# #### Parameters
-#
-# - p_lightmap: Lightmap texture to set
+## Set the lightmap texture[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |p_lightmap|`Texture2D`|Lightmap texture to set|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _set_lightmap(p_lightmap: Texture2D):
 	var need_init = (lightmap != p_lightmap) or (lightmap and not _lightmap_data)
 
@@ -224,27 +281,47 @@ func _set_lightmap(p_lightmap: Texture2D):
 	_update_texture()
 
 
-# Set the scales texture
-#
-# #### Parameters
-#
-# - p_scales: Scale texture to set
+## Set the scales texture[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |p_scales|`Texture2D`|Scale texture to set|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _set_scales(p_scales: Texture2D):
 	scales = p_scales
 	_update_texture()
 
 
-# Set the debug mode
-#
-# #### Parameters
-#
-# - p_mode: Debug mode to set
+## Set the debug mode[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |p_mode|`int`|Debug mode to set|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _set_editor_debug_mode(p_mode: int):
 	editor_debug_mode = p_mode
 	_update_texture()
 
 
-# Update the debug texture, if it is dirty
+## Update the debug texture, if it is dirty.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _update_texture():
 	if _texture_in_update:
 		return
@@ -252,7 +329,15 @@ func _update_texture():
 	call_deferred("_do_update_texture")
 
 
-# Update the texture and optionally set the debug texture
+## Update the texture and optionally set the debug texture[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _do_update_texture():
 	_texture_in_update = false
 	if !is_inside_tree() or !Engine.is_editor_hint():
@@ -273,7 +358,15 @@ func _do_update_texture():
 	queue_redraw()
 
 
-# Draw debugging visualizations
+## Draw debugging visualizations[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _draw():
 	if _texture == null or \
 			not Engine.is_editor_hint() or \
@@ -297,7 +390,20 @@ func _draw():
 
 	draw_texture_rect_region(_texture, dst, src)
 
-
+## Calculate a path from a given point to another. The path consists in a list of points.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |from|`Vector2`|Origin point|yes|[br]
+## |to|`Vector2`|Destination point|yes|[br]
+## |optimize|`bool`|(default is true) enabled optimisation|no|[br]
+## |layers|`int`|bitmask of all region navigation layers that are allowed to be in the path.|no|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `PackedVector2Array` value. (`PackedVector2Array`)
 func get_simple_path(
 		from: Vector2,
 		to: Vector2,

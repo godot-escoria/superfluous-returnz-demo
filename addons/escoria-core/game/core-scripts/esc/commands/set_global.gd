@@ -1,25 +1,33 @@
-# `set_global name value [force=false]`
-#
-# Changes the value of a global.
-#
-# **Parameters**
-#
-# - *name*: Name of the global
-# - *value*: Value to set the global to (can be of type string, boolean, integer
-#   or float)
-# - *force*: if false, setting a global whose name is reserved will
-#   trigger an error. Defaults to false. Reserved globals are: ESC_LAST_SCENE,
-#   FORCE_LAST_SCENE_NULL, ANIMATION_RESOURCES, ESC_CURRENT_SCENE
-#
-# @ESC
+## `set_global(name: String, value: String|Integer|Boolean[, force: Boolean=false])`
+##
+## Changes the value of a global.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |name|`String`|Name of the global variable to set.|yes|[br]
+## |value|`String` or `Integer` or `Boolean`|Value to set the global to (can be of type string, boolean, integer.)|yes|[br]
+## |force|`Boolean`|if false, setting a global whose name is reserved will trigger an error. Defaults to false. Reserved globals are: ESC_LAST_SCENE, FORCE_LAST_SCENE_NULL, ANIMATION_RESOURCES, ESC_CURRENT_SCENE|no|[br]
+## [br]
+## @ASHES
+## @COMMAND
 extends ESCBaseCommand
 class_name SetGlobalCommand
 
-
+## The list of illegal strings that cannot be used in global names.
 const ILLEGAL_STRINGS = ["/"]
 
 
-# Return the descriptor of the arguments of this command
+## The descriptor of the arguments of this command.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the descriptor of the arguments of this command. (`ESCCommandArgumentDescriptor`)
 func configure() -> ESCCommandArgumentDescriptor:
 	return ESCCommandArgumentDescriptor.new(
 		2,
@@ -28,7 +36,17 @@ func configure() -> ESCCommandArgumentDescriptor:
 	)
 
 
-# Validate whether the given arguments match the command descriptor
+## Validates whether the given arguments match the command descriptor.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |arguments|`Array`|The arguments to validate.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns True if the arguments are valid, false otherwise. (`bool`)
 func validate(arguments: Array):
 	if not super.validate(arguments):
 		return false
@@ -45,7 +63,17 @@ func validate(arguments: Array):
 	return true
 
 
-# Run the command
+## Runs the command.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |command_params|`Array`|The parameters for the command.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the execution result code. (`int`)
 func run(command_params: Array) -> int:
 	escoria.globals_manager.set_global(
 		command_params[0],
@@ -55,7 +83,15 @@ func run(command_params: Array) -> int:
 	return ESCExecution.RC_OK
 
 
-# Function called when the command is interrupted.
+## Function called when the command is interrupted.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func interrupt():
 	# Do nothing
 	pass

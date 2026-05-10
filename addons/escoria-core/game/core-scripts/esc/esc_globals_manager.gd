@@ -1,41 +1,72 @@
-# A resource that manages the ESC global states
-# The ESC global state is basically simply a dictionary of keys with
-# values. Values can be bool, integer or strings
-extends Resource
+## A resource that manages the ASHES global states.
+##
+## The ASHES global state is basically simply a dictionary of keys with
+## values. Values can be bool, integer or strings.
+## @MANAGER
 class_name ESCGlobalsManager
+extends Resource
 
 
-# Emitted when a global is changed
+## Emitted when a global has changed.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |global|`Variant`|Key of the global that changed.|yes|[br]
+## |old_value|`Variant`|Value stored under the key before the change.|yes|[br]
+## |new_value|`Variant`|Updated value stored for the key.|yes|[br]
+## [br]
 signal global_changed(global, old_value, new_value)
 
 
-# The globals registry
+# The globals registry.
 @export var _globals: Dictionary = {}
 
-
-# Registry of globals that are to be reserved for internal use only.
+## Registry of globals that are to be reserved for internal use only.
 var _reserved_globals: Dictionary = {}
 
 # Use look-ahead/behind to capture the term in braces
-var globals_regex: RegEx = RegEx.new()
+var _globals_regex: RegEx = RegEx.new()
 
-# Constructor
+## Constructor.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _init():
-	globals_regex.compile("(?<=\\{)(.*)(?=\\})")
+	_globals_regex.compile("(?<=\\{)(.*)(?=\\})")
 
 
-# Check if a global was registered
-#
-# #### Parameters
-#
-# - key: The global key to check
-# **Returns** Whether the global was registered
+## Checks whether a global has already been registered.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |key|`String`|The global key to check.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `bool` value. (`bool`)
 func has(key: String) -> bool:
 	return _globals.has(key)
 
 
-# Clear all globals.
-func clear():
+## Clears all globals.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
+func clear() -> void:
 	_globals.clear()
 	if (escoria.inventory == null):
 		escoria.logger.error(
@@ -47,12 +78,18 @@ func clear():
 	escoria.inventory.clear()
 
 
-# Registers a global as being reserved and initializes it.
-#
-# #### Parameters
-#
-# - key: The key of the global to register
-# - value: The initial value (optional)
+## Registers a global as being reserved and initializes it.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |key|`String`|The key of the global to register.|yes|[br]
+## |value|`Variant`|The key's initial value (optional).|no|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func register_reserved_global(key: String, value = null) -> void:
 	if key in _reserved_globals:
 		escoria.logger.error(
@@ -69,27 +106,47 @@ func register_reserved_global(key: String, value = null) -> void:
 		global_changed.emit(key, old_value, _globals[key])
 
 
-# Get the current value of a global
-#
-# #### Parameters
-#
-# - key: The key of the global to return the value
-# **Returns** The value of the global
+## Retrieves the current value of a global.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |key|`String`|The key of the global to return the value.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `Variant` value representing the global's value, or `null` if not found. (`Variant`)
 func get_global(key: String):
 	if _globals.has(key):
 		return _globals[key]
 	return null
 
 
-# Filter the globals and return all matching keys and their values as
-# a dictionary
-# Check out [the Godot docs](https://docs.godotengine.org/en/stable/classes/class_string.html#class-string-method-match)
-# for the pattern format
-#
-# #### Parameters
-#
-# - pattern: The pattern that the keys have to match
-# **Returns** A dictionary of matching keys and their values
+## Returns a snapshot copy of all currently stored globals.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `Dictionary` containing the current global state. (`Dictionary`)
+func get_globals() -> Dictionary:
+	return _globals.duplicate(true)
+
+
+## Filters the globals and return all matching keys and their values as a dictionary. Check out [the Godot docs](https://docs.godotengine.org/en/stable/classes/class_string.html#class-string-method-match) for the pattern format.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |pattern|`String`|The pattern that the keys have to match.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `Dictionary` value. (`Dictionary`)
 func filter(pattern: String) -> Dictionary:
 	var ret = {}
 	for global_key in _globals.keys():
@@ -98,12 +155,19 @@ func filter(pattern: String) -> Dictionary:
 	return ret
 
 
-# Set the value of a global
-#
-# #### Parameters
-#
-# - key: The key of the global to modify
-# - value: The new value
+## Sets the value of a global.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |key|`String`|The key of the global to modify.|yes|[br]
+## |value|`Variant`|The new value to be stored with the key.|yes|[br]
+## |ignore_reserved|`bool`|If `true`, allows overriding globals marked as reserved.|no|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func set_global(key: String, value, ignore_reserved: bool = false) -> void:
 	if key in _reserved_globals and not ignore_reserved:
 		escoria.logger.error(
@@ -119,29 +183,37 @@ func set_global(key: String, value, ignore_reserved: bool = false) -> void:
 	_globals[key] = value
 
 
-# Set all globals that match the pattern to the value
-# Check out [the Godot docs](https://docs.godotengine.org/en/stable/classes/class_string.html#class-string-method-match)
-# for the pattern format
-#
-# #### Parameters
-#
-# - pattern: The wildcard pattern to match
-# - value: The new value
+## Sets all globals that match the pattern to the value. Check out [the Godot docs](https://docs.godotengine.org/en/stable/classes/class_string.html#class-string-method-match) for the pattern format.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |pattern|`String`|The wildcard pattern to match.|yes|[br]
+## |value|`Variant`|The new value to be stored with the key.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func set_global_wildcard(pattern: String, value) -> void:
-	for global_key in _globals.keys:
+	for global_key in _globals.keys():
 		if global_key.match(pattern):
 			self.set_global(global_key, value)
 
 
-# Look to see if any globals (names in braces) should be interpreted
-#
-# #### Parameters
-#
-# * string: Text in which to replace globals
-#
-# *Returns* the provided string with globals variables replaced with their values
+## Replaces any globals whose names are specified in braces with their respective values (i.e. performs string interpolation). values.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |string|`String`|The text in which globals in braces are to be substituted.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `String` value. (`String`)
 func replace_globals(string: String) -> String:
-	for result in globals_regex.search_all(string):
+	for result in _globals_regex.search_all(string):
 		var globresult = escoria.globals_manager.get_global(
 			str(result.get_string())
 		)
@@ -151,10 +223,17 @@ func replace_globals(string: String) -> String:
 	return string
 
 
-# Save the state of globals in the savegame.
-#
-# #### Parameters
-# - p_savegame: ESCSaveGame resource that holds all data of the save
+## Saves the state of globals in the savegame.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |p_savegame|`ESCSaveGame`|`ESCSaveGame` resource that holds all save data.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func save_game(p_savegame: ESCSaveGame) -> void:
 	p_savegame.globals = {}
 	for g in _globals:

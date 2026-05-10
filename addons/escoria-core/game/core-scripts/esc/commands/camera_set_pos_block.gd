@@ -1,19 +1,20 @@
-# `camera_set_pos_block time x y`
-#
-# Moves the camera to the given absolute position over a time period. Blocks
-# until the command completes.
-#
-# Make sure the coordinates are reachable if camera limits have been configured.
-#
-# **Parameters**
-#
-# - *time*: Number of seconds the transition should take
-# - *x*: Target X coordinate
-# - "y*: Target Y coordinate
-#
-# For more details see: https://docs.escoria-framework.org/camera
-#
-# @ESC
+## `camera_set_pos_block(time: Number, x: Integer, y: Integer)`
+##
+## Moves the camera to the given absolute position over a time period. Blocks
+## until the command completes.[br]
+##[br]
+## Make sure the coordinates are reachable if camera limits have been configured.[br]
+##[br]
+## **Parameters**[br]
+##[br]
+## - *time*: Number of seconds the transition should take[br]
+## - *x*: Target X coordinate[br]
+## - *y*: Target Y coordinate[br]
+##[br]
+## For more details see: https://docs.escoria-framework.org/camera
+##
+## @ASHES
+## @COMMAND
 extends ESCCameraBaseCommand
 class_name CameraSetPosBlockCommand
 
@@ -22,7 +23,15 @@ class_name CameraSetPosBlockCommand
 var _camera_tween: Tween3
 
 
-# Return the descriptor of the arguments of this command
+## The descriptor of the arguments of this command.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the descriptor of the arguments of this command. The argument descriptor for this command. (`ESCCommandArgumentDescriptor`)
 func configure() -> ESCCommandArgumentDescriptor:
 	return ESCCommandArgumentDescriptor.new(
 		3,
@@ -31,7 +40,17 @@ func configure() -> ESCCommandArgumentDescriptor:
 	)
 
 
-# Validate whether the given arguments match the command descriptor
+## Validates whether the given arguments match the command descriptor.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |arguments|`Array`|The arguments to validate.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns True if the arguments are valid, false otherwise. (`bool`)
 func validate(arguments: Array):
 	if not super.validate(arguments):
 		return false
@@ -48,7 +67,17 @@ func validate(arguments: Array):
 	return true
 
 
-# Run the command
+## Runs the command.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |command_params|`Array`|The parameters for the command.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the execution result code. (`int`)
 func run(command_params: Array) -> int:
 	(escoria.object_manager.get_object(escoria.object_manager.CAMERA).node as ESCCamera)\
 			.set_target(
@@ -65,7 +94,15 @@ func run(command_params: Array) -> int:
 	return ESCExecution.RC_OK
 
 
-# Function called when the command is interrupted.
+## Function called when the command is interrupted.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func interrupt():
 	escoria.logger.debug(
 		self,

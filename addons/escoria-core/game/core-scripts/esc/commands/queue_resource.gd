@@ -1,19 +1,29 @@
-# `queue_resource path [front_of_queue]`
-#
-# Queues the loading of the given resource into the resource cache.
-#
-# **Parameters**
-#
-# - *path*: Path of the resource to cache
-# - *front_of_queue*: Whether to put the resource at the front of the
-#   queue in order to load it as soon as possible (default: `false`)
-#
-# @ESC
+## `queue_resource(path: String[, front_of_queue: Boolean])`
+##
+## Queues the loading of the given resource into the resource cache.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |path|`String`|Path of the resource to cache|yes|[br]
+## |front_of_queue|`Boolean`|Whether to put the resource at the front of the queue in order to load it as soon as possible (default: `false`)|no|[br]
+## [br]
+## @ASHES
+## @COMMAND
 extends ESCBaseCommand
 class_name QueueResourceCommand
 
 
-# Return the descriptor of the arguments of this command
+## The descriptor of the arguments of this command.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the descriptor of the arguments of this command. The argument descriptor for this command. (`ESCCommandArgumentDescriptor`)
 func configure() -> ESCCommandArgumentDescriptor:
 	return ESCCommandArgumentDescriptor.new(
 		1,
@@ -22,7 +32,17 @@ func configure() -> ESCCommandArgumentDescriptor:
 	)
 
 
-# Validate whether the given arguments match the command descriptor
+## Validates whether the given arguments match the command descriptor.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |arguments|`Array`|The arguments to validate.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns True if the arguments are valid, false otherwise. (`bool`)
 func validate(arguments: Array) -> bool:
 	if not super.validate(arguments):
 		return false
@@ -36,7 +56,17 @@ func validate(arguments: Array) -> bool:
 	return true
 
 
-# Run the command
+## Runs the command.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |command_params|`Array`|The parameters for the command.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the execution result code. (`int`)
 func run(command_params: Array) -> int:
 	escoria.resource_cache.queue_resource(
 		command_params[0],
@@ -45,7 +75,15 @@ func run(command_params: Array) -> int:
 	return ESCExecution.RC_OK
 
 
-# Function called when the command is interrupted.
+## Function called when the command is interrupted.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func interrupt():
 	# Do nothing
 	pass

@@ -1,27 +1,48 @@
-# A debug window which can run esc commands
+## A debug window which can run esc commands
 extends Window
 
-
-# Reference to the past actions display
-@onready var past_actions = $VBoxContainer/past_actions
-
-# Reference to the command input
-@onready var command = $VBoxContainer/command
-
-# ESC commands kept around for references to their command names.
-var _print: PrintCommand
-
-# History of typed commands
-var commands_history: PackedStringArray
-var commands_history_current_id: int
+## The maximum number of commands to keep in history
 const COMMANDS_HISTORY_LENGTH: int = 20
 
+## History of typed commands
+var commands_history: PackedStringArray
 
+## The current index in the command history
+var commands_history_current_id: int
+
+## ESC commands kept around for references to their command names.
+var _print: PrintCommand
+
+## Reference to the past actions display
+@onready var past_actions = $VBoxContainer/past_actions
+
+## Reference to the command input
+@onready var command = $VBoxContainer/command
+
+## Called when the node is added to the scene tree for the first time.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _ready() -> void:
 	_print = PrintCommand.new()
-	escoria.logger.connect("error_message_signal", Callable(self, "_on_error_message"))
+	escoria.logger.connect("error_message_signal",_on_error_message)
 
-
+## Handles input events for command history navigation.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |event|`InputEvent`|The input event to process.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _input(event: InputEvent):
 	if event.is_pressed() and event is InputEventKey:
 		if (event as InputEventKey).keycode == KEY_UP and not commands_history.is_empty():
@@ -38,11 +59,17 @@ func _input(event: InputEvent):
 			command.call_deferred("grab_focus")
 
 
-# Run a command
-#
-# #### Parameters
-#
-# - p_command_str: Command to execute
+## Runs a command entered in the prompt.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |p_command_str|`String`|Command to execute.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _on_command_text_entered(p_command_str : String):
 	if p_command_str.is_empty():
 		return
@@ -84,7 +111,7 @@ func _on_command_text_entered(p_command_str : String):
 
 	if script:
 		escoria.logger.dont_assert = true
-		escoria.event_manager.queue_event(script.events[escoria.event_manager.EVENT_PRINT])
+		escoria.event_manager.queue_event(script.get_event_with_target(escoria.event_manager.EVENT_PRINT))
 		var ret = await escoria.event_manager.event_finished
 		while ret[1] != _print.get_command_name():
 			ret = await escoria.event_manager.event_finished
@@ -97,15 +124,45 @@ func _on_command_text_entered(p_command_str : String):
 	past_actions.scroll_vertical = past_actions.get_line_count()
 
 
-# Set the focus to the command
+## Sets the focus to the command input field.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _on_esc_prompt_popup_about_to_show():
 	command.call_deferred("grab_focus")
 
+## Handles error messages and displays them in the past actions display.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |message|`Variant`|The error message to display.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _on_error_message(message) -> void:
 	past_actions.text += message + "\n"
 	past_actions.scroll_vertical = past_actions.get_line_count()
 
 
+## Adds a command to the history and manages the history size.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |p_command|`String`|The command to add to history.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _historize_command(p_command: String) -> void:
 	commands_history_current_id += 1
 	commands_history.append(p_command)
@@ -114,5 +171,14 @@ func _historize_command(p_command: String) -> void:
 		commands_history_current_id = COMMANDS_HISTORY_LENGTH - 1
 
 
+## Handles the close request for the prompt popup.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _on_close_requested():
 	escoria.main.get_node("layers/debug_layer/esc_prompt_popup").hide()

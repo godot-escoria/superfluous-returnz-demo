@@ -1,21 +1,31 @@
-# `spawn identifier path [is_active] [position_target]`
-#
-# Programmatically adds a new item to the scene.
-#
-# **Parameters**
-#
-# - *identifier*: Global ID to use for the new object
-# - *path*: Path to the scene file of the object
-# - *is_active*: Whether the new object should be set to active (default: `true`)
-# - *position_target*: Global ID of another object that will be used to
-#   position the new object (when omitted, the new object's position is not specified)
-#
-# @ESC
+## `spawn(identifier: String, path: String[, is_active: Boolean[, position_target: String]])`
+##
+## Programmatically adds a new item to the scene.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |identifier|`String`|Global ID to use for the new object|yes|[br]
+## |path|`String`|Path to the scene file of the object|yes|[br]
+## |is_active|`Boolean`|Whether the new object should be set to active (default: `true`)|no|[br]
+## |position_target|`String`|Global ID of another object that will be used to position the new object (when omitted, the new object's position is not specified)|no|[br]
+## [br]
+## @ASHES
+## @COMMAND
 extends ESCBaseCommand
 class_name SpawnCommand
 
 
-# Return the descriptor of the arguments of this command
+## The descriptor of the arguments of this command.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the descriptor of the arguments of this command. The argument descriptor for this command. (`ESCCommandArgumentDescriptor`)
 func configure() -> ESCCommandArgumentDescriptor:
 	return ESCCommandArgumentDescriptor.new(
 		2,
@@ -24,7 +34,17 @@ func configure() -> ESCCommandArgumentDescriptor:
 	)
 
 
-# Validate whether the given arguments match the command descriptor
+## Validates whether the given arguments match the command descriptor.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |arguments|`Array`|The arguments to validate.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns True if the arguments are valid, false otherwise. (`bool`)
 func validate(arguments: Array):
 	if not super.validate(arguments):
 		return false
@@ -48,7 +68,17 @@ func validate(arguments: Array):
 	return true
 
 
-# Run the command
+## Runs the command.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |command_params|`Array`|The parameters for the command.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the execution result code. (`int`)
 func run(command_params: Array) -> int:
 	var res_scene = escoria.resource_cache.get_resource(command_params[1])
 
@@ -82,7 +112,15 @@ func run(command_params: Array) -> int:
 	return ESCExecution.RC_OK
 
 
-# Function called when the command is interrupted.
+## Function called when the command is interrupted.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func interrupt():
 	# Do nothing
 	pass

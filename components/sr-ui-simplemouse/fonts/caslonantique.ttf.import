@@ -3,12 +3,12 @@
 importer="font_data_dynamic"
 type="FontFile"
 uid="uid://vbbih8y1qeto"
-path="res://.godot/imported/caslonantique.ttf-ad2bf0cdf55cc9817a2b0ed8c4fa40fe.fontdata"
+path="res://.godot/imported/caslonantique.ttf-632f43fdbe5c69d5367364fb8ef91327.fontdata"
 
 [deps]
 
-source_file="res://addons/sr-ui-simplemouse/fonts/caslonantique.ttf"
-dest_files=["res://.godot/imported/caslonantique.ttf-ad2bf0cdf55cc9817a2b0ed8c4fa40fe.fontdata"]
+source_file="res://components/sr-ui-simplemouse/fonts/caslonantique.ttf"
+dest_files=["res://.godot/imported/caslonantique.ttf-632f43fdbe5c69d5367364fb8ef91327.fontdata"]
 
 [params]
 
@@ -21,6 +21,7 @@ msdf_pixel_range=8
 msdf_size=48
 allow_system_fallback=true
 force_autohinter=false
+modulate_color_glyphs=false
 hinting=1
 subpixel_positioning=1
 keep_rounding_remainders=true

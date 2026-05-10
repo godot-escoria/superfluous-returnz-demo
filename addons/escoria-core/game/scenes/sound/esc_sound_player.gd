@@ -1,28 +1,30 @@
-# Background sound player
+## Background sound player
 extends Control
 class_name ESCSoundPlayer
 
-
-# Global id of the background sound player
+## Global id of the sfx sound player.
 @export var global_id: String = "_sound"
 
-
-# The state of the sound player. "default" or "off" disable sound
-# Any other state refers to a sound stream that should be played
+## The state of the sound player. "default" or "off" disable sound. Any other
+## state refers to a sound stream that should be played.
 var state: String = "default"
 
-
-# Reference to the audio player
+## Reference to the audio player.
 @onready var stream: AudioStreamPlayer = $AudioStreamPlayer
 
-
-# Set the state of this player
-#
-# #### Parameters
-#
-# - p_state: New state to use
-# - from_seconds: Sets the starting playback position
-# - p_force: Override the existing state even if the stream is still playing
+## Sets the state of this player.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |p_state|`String`|New state to use.|yes|[br]
+## |from_seconds|`float`|Sets the starting playback position.|no|[br]
+## |p_force|`bool`|Override the existing state even if the stream is still playing.|no|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func set_state(p_state: String, from_seconds: float = 0.0, p_force: bool = false):
 	# If already playing this stream, keep playing, unless p_force
 	if p_state == state and not p_force and stream.is_playing():
@@ -47,7 +49,15 @@ func set_state(p_state: String, from_seconds: float = 0.0, p_force: bool = false
 		stream.play(from_seconds)
 
 
-# Register to the object registry
+## Registers this sound player to the object registry.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _ready():
 	process_mode = Node.PROCESS_MODE_PAUSABLE
 	escoria.object_manager.register_object(
@@ -57,13 +67,27 @@ func _ready():
 	)
 
 
-# Set state to default when finished playing.
+## Sets state to default when finished playing.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _on_sound_finished():
 	state = "default"
 
 
-# Returns the playback position of the audio stream in seconds
-#
-# **Returns** playback position
+## The playback position of the audio stream in seconds.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the playback position of the audio stream in seconds. The playback position in seconds. (`float`)
 func get_playback_position() -> float:
 	return $AudioStreamPlayer.get_playback_position()

@@ -1,8 +1,11 @@
-extends RefCounted
+## The actual interpreter that processes a parsed ASHES script.
 class_name ESCInterpreter
+extends RefCounted
 
 
+## Used to represent the current player character in scripts.
 const CURRENT_PLAYER_KEYWORD = "CURRENT_PLAYER"
+const CURRENT_OBJECT = "THIS"
 
 
 var _globals: ESCEnvironment
@@ -23,6 +26,7 @@ var _locals: Dictionary = {}
 # Still, this should be tested extensively, and, if at all possible, with multiple
 # concurrent events running.
 var _current_event: ESCGrammarStmts.Event
+var _dialog_depth: int = 0
 
 # While most of the time we only run a single event at a time, it is possible for
 # multiple events to
@@ -31,10 +35,12 @@ var _event_stack: Array = []
 var _builtin_functions: Array = [
 	"print"
 ]
+var _channel_name: String = ""
 
 
-func _init(callables: Array, globals: Dictionary):
+func _init(callables: Array, globals: Dictionary, channel_name: String = ""):
 	_globals = ESCEnvironment.new()
+	_channel_name = channel_name
 
 	for callable in callables:
 		_globals.define(callable.get_command_name(), callable)
@@ -46,19 +52,85 @@ func _init(callables: Array, globals: Dictionary):
 		escoria.globals_manager.global_changed.connect(_on_global_changed)
 
 
+func cleanup() -> void:
+	if is_instance_valid(_globals):
+		_globals.cleanup()
+		_globals = null
+
+	if is_instance_valid(_environment):
+		_environment.cleanup()
+		_environment = null
+
+	_locals.clear()
+
+	if not Engine.is_editor_hint():
+		escoria.globals_manager.global_changed.disconnect(_on_global_changed)
+
+
+## The dictionary containing any and all global variables.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the dictionary containing any and all global variables. (`Dictionary`)
 func get_global_values() -> Dictionary:
 	return _globals.get_values()
 
 
+## Gets the event-manager channel this interpreter is executing on.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the channel name associated with this interpreter run. (`String`)
+func get_channel_name() -> String:
+	return _channel_name
+
+
+## Resets the interpreter, specifically any locally-scoped variables.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func reset() -> void:
 	_locals = {}
 
 
+## Issues an interrupt to the currently-running event, if there is one.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func interrupt() -> void:
 	if _current_event and _current_event.get_running_command():
 		_current_event.interrupt()
 
 
+## The main entry point for the interpreter. Takes one or more statements and begins to interpret them. These usually represent the statements at the top level of the script being processed.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |statements|`Variant`|a single `ESCGrammarStmt`-derived statement or an array of them, representing the statements to be interpreted|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func interpret(statements):
 	if not statements is Array:
 		statements = [statements]
@@ -76,6 +148,18 @@ func interpret(statements):
 
 
 # Visitor implementations
+
+## Executes code relevant to interpreting a statement block.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |stmt|`ESCGrammarStmts.Block`|Statement node to interpret.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_block_stmt(stmt: ESCGrammarStmts.Block):
 	var env: ESCEnvironment = ESCEnvironment.new()
 	env.init(_environment)
@@ -83,6 +167,17 @@ func visit_block_stmt(stmt: ESCGrammarStmts.Block):
 	return await _execute_block(stmt.get_statements(), env)
 
 
+## Executes code relevant to interpreting an event in ASHES, e.g. `:look`. Emits the statement's `finished` signal upon completion, containing the return code.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |stmt|`ESCGrammarStmts.Event`|the `ESCGrammarStmt` representing the ASHES event|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_event_stmt(stmt: ESCGrammarStmts.Event):
 	_current_event = stmt
 
@@ -125,10 +220,32 @@ func visit_event_stmt(stmt: ESCGrammarStmts.Event):
 	#return event
 
 
+## Executes code relevant to interpreting an expression contained in a statement.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |stmt|`ESCGrammarStmts.ESCExpression`|Statement node to interpret.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_expression_stmt(stmt: ESCGrammarStmts.ESCExpression):
 	return await _evaluate(stmt.get_expression())
 
 
+## Executes code relevant to interpreting a function/method call.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |expr|`ESCGrammarExprs.Call`|the expression representing the function/method call to make|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_call_expr(expr: ESCGrammarExprs.Call):
 	var callee = await _evaluate(expr.get_callee())
 
@@ -152,13 +269,15 @@ func visit_call_expr(expr: ESCGrammarExprs.Call):
 				self,
 				"Can only call valid commands."
 			)
-		else:
-			return _handle_builtin_function(callee, args)
+			return ESCExecution.RC_ERROR
+
+		return _handle_builtin_function(callee, args)
 
 	var command = ESCCommand.new()
 	command.parameters = args
 	command.name = callee.get_command_name()
 	command.parser_token = expr.get_paren_token()
+	command.channel_name = _channel_name
 
 	var rc = ESCExecution.RC_OK
 
@@ -175,17 +294,18 @@ func visit_call_expr(expr: ESCGrammarExprs.Call):
 	return rc
 
 
-# TODO: If we end up having functions that need to return values, use and 'out' parameter.
+# TODO: If we end up having functions that need to return values, use an 'out' parameter.
 func _handle_builtin_function(fn_name: String, args: Array) -> int:
 	var rc = ESCExecution.RC_ERROR
 
 	match fn_name:
 		'print':
-			if args.size() > 1:
+			if args.size() != 1:
 				escoria.logger.error(
 					self,
-					"'print' only takes one argument"
+					"'print' expects exactly one argument"
 				)
+				return rc
 
 			_print(args)
 			rc = ESCExecution.RC_OK
@@ -200,25 +320,42 @@ func _print(value):
 	print(value[0])
 
 
+## Executes code relevant to interpreting an `if` statement.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |stmt|`ESCGrammarStmts.If`|Statement node to interpret.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_if_stmt(stmt: ESCGrammarStmts.If):
 	if _is_truthy(await _evaluate(stmt.get_condition())):
 		return await _execute(stmt.get_then_branch())
-	else:
-		#var branched: bool = false
 
-		for branch in stmt.get_elif_branches():
-			if _is_truthy(await _evaluate(branch.get_condition())):
-				return await _execute(branch)
-#				branched = true
-#				break
+	for branch in stmt.get_elif_branches():
+		if _is_truthy(await _evaluate(branch.get_condition())):
+			return await _execute(branch)
 
-		#if not branched and stmt.get_else_branch():
-		if stmt.get_else_branch():
-			return await _execute(stmt.get_else_branch())
+	if stmt.get_else_branch():
+		return await _execute(stmt.get_else_branch())
 
 	return null
 
 
+## Executes code relevant to interpreting a `while` loop.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |stmt|`ESCGrammarStmts.While`|Statement node to interpret.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_while_stmt(stmt: ESCGrammarStmts.While):
 	while _is_truthy(await _evaluate(stmt.get_condition())):
 		var ret = await _execute(stmt.get_body())
@@ -226,17 +363,66 @@ func visit_while_stmt(stmt: ESCGrammarStmts.While):
 		if ret is ESCGrammarStmts.Break:
 			break
 
+		if _is_terminal_control_flow(ret):
+			return ret
+
 	return null
 
 
-func visit_pass_stmt(stmt: ESCGrammarStmts.Pass):
+## Executes code relevant to interpreting a `pass` statement.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |stmt|`ESCGrammarStmts.Pass`|Statement node to interpret.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
+func visit_pass_stmt(_stmt: ESCGrammarStmts.Pass):
 	pass
 
 
+func _is_terminal_control_flow(ret) -> bool:
+	if ret is ESCGrammarStmts.Stop \
+		or ret is ESCGrammarStmts.Done \
+		or ret is ESCBreakCounter:
+		return true
+
+	if typeof(ret) == TYPE_INT:
+		return ret == ESCExecution.RC_ERROR \
+			or ret == ESCExecution.RC_INTERRUPTED
+
+	return false
+
+
+## Executes code relevant to interpreting a `stop` statement. Relevant only to dialogs.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |stmt|`ESCGrammarStmts.Stop`|Statement node to interpret.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_stop_stmt(stmt: ESCGrammarStmts.Stop):
 	return stmt
 
 
+## Executes code relevant to interpreting a variable declaration and possible initialization.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |stmt|`ESCGrammarStmts.Var`|Statement node to interpret.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_var_stmt(stmt: ESCGrammarStmts.Var):
 	var value = null
 
@@ -247,6 +433,17 @@ func visit_var_stmt(stmt: ESCGrammarStmts.Var):
 	return null
 
 
+## Executes code relevant to interpreting a global variable declaration and possible initialization.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |stmt|`ESCGrammarStmts.Global`|Statement node to interpret.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_global_stmt(stmt: ESCGrammarStmts.Global):
 	var value = null
 
@@ -256,22 +453,92 @@ func visit_global_stmt(stmt: ESCGrammarStmts.Global):
 	# Only define the global if we haven't already done so; otherwise, just
 	# ignore it
 	if not _globals.get_values().has(stmt.get_name().get_lexeme()):
+		escoria.globals_manager.set_global(stmt.get_name().get_lexeme(), value)
 		_globals.define(stmt.get_name().get_lexeme(), value)
 
 	return null
 
 
+## Executes code relevant to interpreting a block of dialog.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |stmt|`ESCGrammarStmts.Dialog`|Statement node to interpret.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_dialog_stmt(stmt: ESCGrammarStmts.Dialog):
 	var dialog: ESCDialog = ESCDialog.new()
 	var rc = ESCExecution.RC_OK
+	var dialog_args := stmt.get_args()
+
+	_dialog_depth += 1
+
+	if dialog_args.size() > 0:
+		var avatar = await _evaluate(dialog_args[0])
+
+		if avatar != null and not avatar is String and not avatar is StringName:
+			escoria.logger.error(
+				self,
+				"Dialog avatar must evaluate to a String."
+			)
+			_dialog_depth -= 1
+			return ESCExecution.RC_ERROR
+
+		dialog.avatar = str(avatar)
+
+	if dialog_args.size() > 1:
+		var timeout = await _evaluate(dialog_args[1])
+
+		if not timeout is int and not timeout is float:
+			escoria.logger.error(
+				self,
+				"Dialog timeout must evaluate to a number."
+			)
+			_dialog_depth -= 1
+			return ESCExecution.RC_ERROR
+
+		if timeout < 0:
+			escoria.logger.error(
+				self,
+				"Dialog timeout must be greater than or equal to 0."
+			)
+			_dialog_depth -= 1
+			return ESCExecution.RC_ERROR
+
+		dialog.timeout = int(timeout)
+
+	if dialog_args.size() > 2:
+		var timeout_option = await _evaluate(dialog_args[2])
+
+		if not timeout_option is int and not timeout_option is float:
+			escoria.logger.error(
+				self,
+				"Dialog timeout option must evaluate to a number."
+			)
+			_dialog_depth -= 1
+			return ESCExecution.RC_ERROR
+
+		if timeout_option < 0:
+			escoria.logger.error(
+				self,
+				"Dialog timeout option must be greater than or equal to 0."
+			)
+			_dialog_depth -= 1
+			return ESCExecution.RC_ERROR
+
+		dialog.timeout_option = int(timeout_option)
 
 	while true:
 		dialog.options = []
 
 		for dialog_option in stmt.get_options():
 			var option: ESCDialogOption = ESCDialogOption.new()
-			# TODO: Translation keys
 			option.source_option = dialog_option
+			option.translation_key = dialog_option.get_translation_key()
 			option.option = await _evaluate(dialog_option.get_option())
 
 			if dialog_option.get_condition():
@@ -279,14 +546,23 @@ func visit_dialog_stmt(stmt: ESCGrammarStmts.Dialog):
 			else:
 				option.set_is_valid(true)
 
-			dialog.options.append(option)
+			# Dialog execution should stop once no valid options remain. Keep only
+			# currently valid options in the presented list so an exhausted dialog
+			# concludes instead of re-running forever with unselectable entries.
+			if option.is_valid():
+				dialog.options.append(option)
 
 		if dialog.options.size() == 0:
 			break
 
-		if dialog.is_valid() and not _current_event.is_interrupted():
-			#_current_event.set_running_command(dialog)
-			#rc = dialog.run()
+		# If the event was interrupted while a nested command or dialog body was
+		# active, stop the dialog frame immediately instead of looping and
+		# presenting options again.
+		if _current_event and _current_event.is_interrupted():
+			_dialog_depth -= 1
+			return ESCExecution.RC_INTERRUPTED
+
+		if dialog.is_valid():
 			var chosen_option = await dialog.run()
 
 			if chosen_option:
@@ -296,46 +572,132 @@ func visit_dialog_stmt(stmt: ESCGrammarStmts.Dialog):
 					"Chosen dialog option (%s) was completed." % chosen_option
 				)
 
+				# Dialog frames must propagate terminal runtime errors the same
+				# way normal blocks do. Otherwise an invalid command or similar
+				# failure inside an option body is treated like normal completion
+				# and the dialog loop re-displays the same options indefinitely.
+				if typeof(execute_ret) == TYPE_INT and execute_ret == ESCExecution.RC_ERROR:
+					_dialog_depth -= 1
+					return ESCExecution.RC_ERROR
+
+				# An interruption can happen while the chosen option body is still
+				# running, so check again after it returns before processing normal
+				# dialog control flow like `break`, `done`, or `stop`.
+				if _current_event and _current_event.is_interrupted():
+					_dialog_depth -= 1
+					return ESCExecution.RC_INTERRUPTED
+
 				if execute_ret is ESCGrammarStmts.Break:
-					var break_tracker: ESCBreakCounter = ESCBreakCounter.new()
-
+					var levels_left := 0
 					if execute_ret.get_levels():
-						break_tracker.set_levels_left(await _evaluate(execute_ret.get_levels()) - 1)
-					else:
-						break_tracker.set_levels_left(0)
+						levels_left = await _evaluate(execute_ret.get_levels()) - 1
 
+					# A top-level dialog consumes `break` by concluding the current dialog.
+					if _dialog_depth == 1:
+						break
+
+					# Nested dialogs propagate explicit break state upward so parent
+					# dialog frames can decide whether to keep unwinding or resume.
+					var break_tracker: ESCBreakCounter = ESCBreakCounter.new()
+					if levels_left > 0:
+						break_tracker.set_levels_left(levels_left)
+					else:
+						break_tracker.mark_resume_parent_dialog()
+
+					_dialog_depth -= 1
 					return break_tracker
-				elif execute_ret is ESCGrammarStmts.Done:
+				if execute_ret is ESCGrammarStmts.Done:
+					_dialog_depth -= 1
+
+					if _dialog_depth == 0:
+						return rc
+
 					return execute_ret
-				elif execute_ret is ESCBreakCounter:
-					if execute_ret.get_levels_left() > 0:
-						execute_ret.dec_levels_left()
+
+				if execute_ret is ESCGrammarStmts.Stop:
+					# `stop` aborts the entire event, so dialog frames must pass it through.
+					_dialog_depth -= 1
+					return execute_ret
+
+				if execute_ret is ESCBreakCounter:
+					if execute_ret.has_levels_left():
+						# Once the unwind reaches the top-most dialog, the remaining
+						# levels are consumed by concluding that dialog entirely.
+						if _dialog_depth == 1:
+							break
+
+						execute_ret.advance_up_one_level()
+						_dialog_depth -= 1
 						return execute_ret
 
-#		if rc is GDScriptFunctionState:
-#			rc = yield(rc, "completed")
-#			escoria.logger.debug(
-#				self,
-#				"Dialog (%s) was completed." % dialog
-#			)
+					if execute_ret.should_resume_parent_dialog():
+						# The requested dialog levels have been exited, so this frame
+						# resumes presenting its own options instead of concluding.
+						execute_ret.consume_parent_resume()
+						continue
 
-		#_current_event.clear_running_command()
+					break
 
+	_dialog_depth -= 1
 	return rc
 
 
-func visit_dialog_option_stmt(stmt: ESCGrammarStmts.DialogOption):
+## Executes code relevant to interpreting a dialog option, although this is more of a placeholder to keep the processing of the syntax tree going since dialog options are handled by the overall dialog block.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |stmt|`ESCGrammarStmts.DialogOption`|Statement node to interpret.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
+func visit_dialog_option_stmt(_stmt: ESCGrammarStmts.DialogOption):
 	pass
 
 
+## Executes code relevant to interpreting a `break` statement.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |stmt|`ESCGrammarStmts.Break`|Statement node to interpret.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_break_stmt(stmt: ESCGrammarStmts.Break):
 	return stmt
 
 
+## Executes code relevant to interpreting a `done` statement. Only relevant when processing dialogs.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |stmt|`ESCGrammarStmts.Done`|Statement node to interpret.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_done_stmt(stmt: ESCGrammarStmts.Done):
 	return stmt
 
 
+## Executes code relevant to interpreting an expression that assigns a value to a variable. Enforces traditional scoping rules.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |expr|`ESCGrammarExprs.Assign`|Expression node to evaluate.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_assign_expr(expr: ESCGrammarExprs.Assign):
 	var value = await _evaluate(expr.get_value())
 
@@ -350,6 +712,17 @@ func visit_assign_expr(expr: ESCGrammarExprs.Assign):
 	return value
 
 
+## Executes code relevant to interpreting an `in` statement when checking whether an item in Escoria is in the player's inventory.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |expr|`ESCGrammarExprs.InInventory`|Expression node to evaluate.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_in_inventory_expr(expr: ESCGrammarExprs.InInventory):
 	var arg = await _evaluate(expr.get_identifier())
 
@@ -359,6 +732,17 @@ func visit_in_inventory_expr(expr: ESCGrammarExprs.InInventory):
 	return escoria.inventory_manager.inventory_has(arg)
 
 
+## Executes code relevant to interpreting an `is` statement when checking whether an item in Escoria has a particular state and/or is active.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |expr|`ESCGrammarExprs.Is`|Expression node to evaluate.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_is_expr(expr: ESCGrammarExprs.Is):
 	var arg = await _evaluate(expr.get_identifier())
 
@@ -372,6 +756,17 @@ func visit_is_expr(expr: ESCGrammarExprs.Is):
 	return arg.is_active()
 
 
+## Executes code relevant to interpreting binary expressions, e.g. `==`, `!=`, etc.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |expr|`ESCGrammarExprs.Binary`|Expression node to evaluate.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_binary_expr(expr: ESCGrammarExprs.Binary):
 	var left_part = await _evaluate(expr.get_left())
 	var right_part = await _evaluate(expr.get_right())
@@ -383,18 +778,28 @@ func visit_binary_expr(expr: ESCGrammarExprs.Binary):
 			return not _is_equal(left_part, right_part)
 		ESCTokenType.TokenType.GREATER:
 			var check = _check_are_numbers(left_part, expr.get_operator(), right_part)
+			if not check:
+				return null
 			return left_part > right_part
 		ESCTokenType.TokenType.GREATER_EQUAL:
 			var check = _check_are_numbers(left_part, expr.get_operator(), right_part)
+			if not check:
+				return null
 			return left_part >= right_part
 		ESCTokenType.TokenType.LESS:
 			var check = _check_are_numbers(left_part, expr.get_operator(), right_part)
+			if not check:
+				return null
 			return left_part < right_part
 		ESCTokenType.TokenType.LESS_EQUAL:
 			var check = _check_are_numbers(left_part, expr.get_operator(), right_part)
+			if not check:
+				return null
 			return left_part <= right_part
 		ESCTokenType.TokenType.MINUS:
 			var check = _check_are_numbers(left_part, expr.get_operator(), right_part)
+			if not check:
+				return null
 			return left_part - right_part
 		ESCTokenType.TokenType.PLUS:
 			var check = _check_are_numbers(left_part, expr.get_operator(), right_part, false)
@@ -413,14 +818,29 @@ func visit_binary_expr(expr: ESCGrammarExprs.Binary):
 			)
 		ESCTokenType.TokenType.SLASH:
 			var check = _check_are_numbers(left_part, expr.get_operator(), right_part)
+			if not check:
+				return null
 			return left_part / right_part
 		ESCTokenType.TokenType.STAR:
 			var check = _check_are_numbers(left_part, expr.get_operator(), right_part)
+			if not check:
+				return null
 			return left_part * right_part
 
 	return null
 
 
+## Executes code relevant to interpreting unary expressions, e.g. `!`, `-`.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |expr|`ESCGrammarExprs.Unary`|Expression node to evaluate.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_unary_expr(expr: ESCGrammarExprs.Unary):
 	var right_part = await _evaluate(expr.get_right())
 
@@ -429,11 +849,24 @@ func visit_unary_expr(expr: ESCGrammarExprs.Unary):
 			return not _is_truthy(right_part)
 		ESCTokenType.TokenType.MINUS:
 			var check = _check_is_number(right_part, expr.get_operator())
+			if not check:
+				return null
 			return -right_part
 
 	return null
 
 
+## Executes code relevant to interpreting variable expressions. Worth noting is that variables prefixed with a `$` are treated as global IDs, e.g. `$npc_character` is interperted as the global ID `npc_character`.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |expr|`ESCGrammarExprs.Variable`|Expression node to evaluate.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_variable_expr(expr: ESCGrammarExprs.Variable):
 	if expr.get_name().get_lexeme().begins_with("$"):
 		return _look_up_object(expr.get_name())
@@ -444,10 +877,32 @@ func visit_variable_expr(expr: ESCGrammarExprs.Variable):
 	return look_up_variable(expr.get_name(), expr)
 
 
+## Executes code relevant to interpreting literal expressions, e.g. `"some string", `1234`, etc.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |expr|`ESCGrammarExprs.Literal`|Expression node to evaluate.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_literal_expr(expr: ESCGrammarExprs.Literal):
 	return expr.get_value()
 
 
+## Executes code relevant to interpreting logical expressions, e.g. `AND`, `OR`, etc.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |expr|`ESCGrammarExprs.Logical`|Expression node to evaluate.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_logical_expr(expr: ESCGrammarExprs.Logical):
 	var left = await _evaluate(expr.get_left())
 
@@ -461,12 +916,56 @@ func visit_logical_expr(expr: ESCGrammarExprs.Logical):
 	return await _evaluate(expr.get_right())
 
 
+## Executes code relevant to interpreting grouped expressions, e.g. those surrounded by parentheses.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |expr|`ESCGrammarExprs.Grouping`|Expression node to evaluate.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func visit_grouping_expr(expr: ESCGrammarExprs.Grouping):
 	return await _evaluate(expr.get_expression())
 
 
+## Performs resolution of the specified expression by specifying its scope depth.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |expr|`ESCGrammarExpr`|the expression requiring access to locally scoped variables|yes|[br]
+## |depth|`int`|the scope depth of the local variables to be used by the expression|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func resolve(expr: ESCGrammarExpr, depth: int):
 	_locals[expr] = depth
+
+
+## Fetches the value of the variable specified by `name` provided it exists within the applicable scope for the expression `expr`.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |name|`ESCToken`|Token representing the variable name to resolve.|yes|[br]
+## |expr|`ESCGrammarExpr`|the expression containing the variable identified by `name`|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the value stored for the resolved variable. (`Variant`)
+func look_up_variable(name: ESCToken, expr: ESCGrammarExpr):
+	var distance: int = _locals[expr] if _locals.has(expr) else -1
+
+	if distance == -1:
+		return _globals.get_value(name)
+
+	return _environment.get_at(distance, name.get_lexeme())
 
 
 # Private methods
@@ -475,6 +974,13 @@ func _look_up_object(name: ESCToken):
 
 	if global_id.to_upper() == CURRENT_PLAYER_KEYWORD:
 		global_id = escoria.main.current_scene.player.global_id
+	elif global_id.to_upper() == CURRENT_OBJECT:
+		# check if the event is attached to an object; if it isn't, then
+		# assume it's associated to the current scene (room)
+		global_id = _current_event.get_object_global_id()
+
+		if global_id.is_empty():
+			global_id = escoria.main.current_scene.global_id
 
 	return _look_up_object_by_global_id(global_id)
 
@@ -495,14 +1001,11 @@ func _look_up_object_by_global_id(global_id: String):
 
 	return null
 
-
-func look_up_variable(name: ESCToken, expr: ESCGrammarExpr):
-	var distance: int = _locals[expr] if _locals.has(expr) else -1
-
-	if distance == -1:
+func look_up_global(name: ESCToken):
+	if _globals.get_values().has(name.get_lexeme()):
 		return _globals.get_value(name)
-	else:
-		return _environment.get_at(distance, name.get_lexeme())
+
+	return null
 
 
 func _evaluate(expr: ESCGrammarExpr):
@@ -528,10 +1031,18 @@ func _execute_block(statements: Array, env: ESCEnvironment):
 	for stmt in statements:
 		ret = await _execute(stmt)
 
-		if ret is ESCGrammarStmts.Break \
-			or ret is ESCGrammarStmts.Done \
-			or ret is ESCGrammarStmts.Stop:
+		# If the running event was interrupted while this statement was active,
+		# stop the block immediately so later statements do not continue running.
+		if _current_event and _current_event.is_interrupted():
+			_environment = previous_env
+			return ESCExecution.RC_INTERRUPTED
 
+		if ret is ESCGrammarStmts.Break:
+			_environment = previous_env
+			return ret
+
+		if _is_terminal_control_flow(ret):
+			_environment = previous_env
 			return ret
 
 		# TODO: Proper error handling per statement?
@@ -593,12 +1104,12 @@ func _check_at_least_one_string(value_1, value_2):
 	return typeof(value_1) == TYPE_STRING || typeof(value_2) == TYPE_STRING
 
 
-func _on_global_changed(key: String, old_value, new_value) -> void:
+func _on_global_changed(key: String, _old_value, new_value) -> void:
 	# Shoehorn this in as an adapter
 	var token: ESCToken = ESCToken.new()
 	token.init(ESCTokenType.TokenType.IDENTIFIER, key, null, "", -1, "")
 
 	if _globals.get_values().has(key):
 		_globals.assign(token, new_value)
-	elif escoria.save_manager.is_loading_game:
+	else:
 		_globals.define(key, new_value)
