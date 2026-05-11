@@ -36,11 +36,7 @@ func _process(delta):
 func set_by_name(name: String, force_verb: String = "") -> void:
 	if name.is_empty():
 		return
-	#Input.set_custom_mouse_cursor(
-	#	cursors[current_cursor_id].texture,
-	#	Input.CURSOR_ARROW,
-	#	Vector2(0,0)
-	#)
+
 	Input.set_custom_mouse_cursor(resized_cursors[name], Input.CURSOR_ARROW, cursors[name].hotspot)
 	
 	if force_verb.is_empty():

@@ -307,6 +307,9 @@ polygon = PackedVector2Array(184, 559, 334, 551, 319, 653, 281, 661, 275, 719, 3
 [node name="ESCInteractionLocation" type="Marker2D" parent="items/desk/computer" unique_id=880301331]
 position = Vector2(281, 802)
 script = ExtResource("19_r0cw4")
+global_id = null
+is_start_location = null
+player_orients_on_arrival = null
 interaction_angle = 180
 metadata/_custom_type_script = "uid://chu4bvqgwxuts"
 
@@ -332,6 +335,10 @@ polygon = PackedVector2Array(340, 726, 340, 634, 351, 621, 351, 611, 358, 605, 3
 [node name="ESCInteractionLocation" type="Marker2D" parent="items/desk/bottle" unique_id=1265444266]
 position = Vector2(377, 794)
 script = ExtResource("19_r0cw4")
+global_id = null
+is_start_location = null
+player_orients_on_arrival = null
+interaction_angle = null
 metadata/_custom_type_script = "uid://chu4bvqgwxuts"
 
 [node name="documents" type="Area2D" parent="items/desk" unique_id=1220558656]
@@ -463,6 +470,10 @@ libraries/ = SubResource("AnimationLibrary_27wwv")
 [node name="ESCInteractionLocation" type="Marker2D" parent="items/plant" unique_id=1797504854]
 position = Vector2(47, 286)
 script = ExtResource("19_r0cw4")
+global_id = null
+is_start_location = null
+player_orients_on_arrival = null
+interaction_angle = null
 
 [node name="gnustatue" type="Area2D" parent="items" unique_id=1851211505]
 process_mode = 1

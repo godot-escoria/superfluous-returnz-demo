@@ -14,7 +14,7 @@
 	if plant_moved:
 		force_event_flag("plant", "use", "TK")
 
-	global intro_done = true
+	global intro_done = false
 	if !intro_done:
 		accept_input("NONE")
 		walk_block($sophie, "intro_start_point")

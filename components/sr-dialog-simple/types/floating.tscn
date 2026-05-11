@@ -1,12 +1,15 @@
-[gd_scene load_steps=2 format=3 uid="uid://duatpb2fc36db"]
+[gd_scene format=3 uid="uid://m2tml00lohyo"]
 
-[ext_resource type="Script" uid="uid://jhr1gt0fmm0u" path="res://addons/escoria-dialog-simple/types/floating.gd" id="1"]
+[ext_resource type="FontFile" uid="uid://dw0le1qo4dwjx" path="res://components/sr-dialog-simple/fonts/TovariSans.ttf" id="1_yrks4"]
+[ext_resource type="Script" uid="uid://dkv58cu2qewvs" path="res://components/sr-dialog-simple/types/floating.gd" id="2_w33v6"]
 
-[node name="dialog_label" type="RichTextLabel"]
+[node name="dialog_label" type="RichTextLabel" unique_id=2079377558]
 offset_right = 643.0
 offset_bottom = 60.0
+theme_override_fonts/normal_font = ExtResource("1_yrks4")
+theme_override_font_sizes/normal_font_size = 50
 bbcode_enabled = true
 text = "Here be some text."
-script = ExtResource("1")
+script = ExtResource("2_w33v6")
 
-[node name="Timer" type="Timer" parent="."]
+[node name="Timer" type="Timer" parent="." unique_id=511442448]
