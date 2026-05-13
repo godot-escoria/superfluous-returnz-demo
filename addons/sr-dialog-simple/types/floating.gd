@@ -215,13 +215,13 @@ func voice_audio_finished():
 # The dialog line was printed, start the waiting time and then finish
 # the dialog
 func _on_dialog_line_typed(object, key):
-	_stop_character_talking()
+	
 	text_node.visible_characters = -1
 
 	var time_to_disappear: float = _calculate_time_to_disappear()
 	$Timer.start(time_to_disappear)
 	$Timer.timeout.connect(_on_dialog_finished)
-
+	_stop_character_talking()
 	say_visible.emit()
 
 

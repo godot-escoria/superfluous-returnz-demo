@@ -90,10 +90,6 @@ superfluous-dialogs/avatars_path="res://game/dialog_avatars"
 superfluous-dialogs/text_time_per_letter_ms=100.0
 superfluous-dialogs/text_time_per_fast_letter_ms=25.0
 superfluous-dialogs/clear_text_by_click_only=false
-superfluous-dialogs/reading_speed_in_wpm=100
+superfluous-dialogs/reading_speed_in_wpm=150
 superfluous-dialogs/left_click_action="Speed up"
 superfluous-dialogs/stop_talking_animation_on="End of audio"
-
-[rendering]
-
-renderer/rendering_method="mobile"

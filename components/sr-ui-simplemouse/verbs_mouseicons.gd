@@ -21,6 +21,7 @@ extends Control
 var resized_cursors: Dictionary
 @onready var action_manually_changed = false
 
+@onready var verb_chooser = $CanvasLayer/verb_chooser
 
 func _ready():
 	if !Engine.is_editor_hint():
@@ -65,3 +66,12 @@ func _on_window_size_changed():
 			var image = texture.get_image()
 			image.resize(image.get_size().x * scale_size, image.get_size().y * scale_size, Image.INTERPOLATE_NEAREST) #Resize to fit window size
 			resized_cursors[action] = image
+
+
+func _on_spawn_pressed() -> void:
+	var verbs: Array[String] = ["Move", "Look", "Inventory", "Pick up"]
+	verb_chooser.spawn(verb_chooser.Placement.NORMAL, Vector2(500,400), verbs)
+
+
+func _on_despawn_pressed() -> void:
+	verb_chooser.despawn()

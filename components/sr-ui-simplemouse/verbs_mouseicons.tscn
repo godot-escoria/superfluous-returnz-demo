@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://0qms6fx5siad"]
 
 [ext_resource type="Script" uid="uid://d2mlyj6637kqo" path="res://components/sr-ui-simplemouse/verbs_mouseicons.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://cgrif8k8itge2" path="res://components/sr-ui-simplemouse/verbs_chooser/verb_chooser.tscn" id="2_uykr5"]
 
 [node name="verbs_menu" type="Control" unique_id=433290847]
 layout_mode = 3
@@ -11,20 +12,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1")
-
-[node name="actions" type="HBoxContainer" parent="." unique_id=43845384]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -6.0
-offset_top = -5.0
-offset_right = -1510.0
-offset_bottom = -975.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
 
 [node name="mouse_position" type="Control" parent="." unique_id=1635967630]
 anchors_preset = 0
@@ -37,3 +24,26 @@ offset_top = -16.0
 offset_right = 88.0
 offset_bottom = 24.0
 mouse_filter = 2
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=10764722]
+
+[node name="verb_chooser" parent="CanvasLayer" unique_id=1376088898 instance=ExtResource("2_uykr5")]
+scale = Vector2(0.75, 0.75)
+init_gap = 65.0
+wobble_gap = 16
+
+[node name="spawn" type="Button" parent="." unique_id=1518588458]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "spawn"
+
+[node name="despawn" type="Button" parent="." unique_id=122695639]
+layout_mode = 0
+offset_left = 87.0
+offset_right = 165.0
+offset_bottom = 31.0
+text = "despawn"
+
+[connection signal="pressed" from="spawn" to="." method="_on_spawn_pressed"]
+[connection signal="pressed" from="despawn" to="." method="_on_despawn_pressed"]
