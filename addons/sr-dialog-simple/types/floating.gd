@@ -8,6 +8,7 @@ signal say_finished
 # Signal emitted when text has just become fully visible
 signal say_visible
 
+var dialog_location_node = null
 
 # The text speed per character for normal display
 var _text_time_per_character: float
@@ -21,7 +22,6 @@ var _reading_speed_in_wpm: int
 
 # Used to extract words from lines of text.
 var _word_regex: RegEx = RegEx.new()
-
 
 # Current character speaking, to keep track of reference for animation purposes
 var _current_character
@@ -42,7 +42,6 @@ var _current_line: String
 # Whether the dialog manager is paused
 @onready var is_paused: bool = true
 
-var dialog_location_node = null
 
 # Enable bbcode and catch the signal when a tween completed
 func _ready():
@@ -108,7 +107,7 @@ func _ready():
 	_current_line = ""
 
 
-func _process(delta):
+func _process(_delta: float):
 	if _current_character.is_inside_tree() and \
 			is_instance_valid(dialog_location_node):
 		# Position the RichTextLabel on the character's dialog position, if any.
@@ -175,13 +174,10 @@ func say(character: String, line: String) :
 	text_node.visible_ratio = 0.0
 	var time_show_full_text = _text_time_per_character / 1000 * len(_current_line)
 
-	if time_show_full_text == 0.0:
-		text_node.visible_ratio = 1.0
-		await get_tree().create_timer(0.1 * len(_current_line)).timeout
 	tween.reset()
 	tween.interpolate_property(text_node, "visible_ratio",
-		0.0, 1.0, time_show_full_text,
-		Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
+			0.0, 1.0, time_show_full_text,
+			Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
 	tween.play()
 	set_process(true)
 
@@ -192,10 +188,6 @@ func speedup():
 		_is_speeding_up = true
 		var time_show_full_text = _fast_text_time_per_character / 1000 * len(_current_line)
 
-		if time_show_full_text == 0.0:
-			text_node.visible_ratio = 1.0
-			await get_tree().create_timer(0.1 * len(_current_line)).timeout
-		tween.reset()
 		tween.interpolate_property(text_node, "visible_ratio",
 			text_node.visible_ratio, 1.0, time_show_full_text,
 			Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
@@ -218,18 +210,19 @@ func voice_audio_finished():
 
 # The dialog line was printed, start the waiting time and then finish
 # the dialog
-func _on_dialog_line_typed(object, key):
+func _on_dialog_line_typed(_object, _key):
+	_stop_character_talking()
 	text_node.visible_characters = -1
 
 	var time_to_disappear: float = _calculate_time_to_disappear()
-	$Timer.start(time_to_disappear/1000)
+	$Timer.start(time_to_disappear)
 	$Timer.timeout.connect(_on_dialog_finished)
-	_stop_character_talking()
+
 	say_visible.emit()
 
 
 func _calculate_time_to_disappear() -> float:
-	return (_get_number_of_words() / _reading_speed_in_wpm as float) * 60.0
+	return (_get_number_of_words() / float(_reading_speed_in_wpm)) * 60.0
 
 
 func _get_number_of_words() -> int:
