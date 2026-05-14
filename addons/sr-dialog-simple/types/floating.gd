@@ -194,7 +194,7 @@ func speedup():
 
 		if time_show_full_text == 0.0:
 			text_node.visible_ratio = 1.0
-			await get_tree().create_timer(2.0).timeout
+			await get_tree().create_timer(0.1 * len(_current_line)).timeout
 		tween.reset()
 		tween.interpolate_property(text_node, "visible_ratio",
 			text_node.visible_ratio, 1.0, time_show_full_text,
@@ -219,18 +219,17 @@ func voice_audio_finished():
 # The dialog line was printed, start the waiting time and then finish
 # the dialog
 func _on_dialog_line_typed(object, key):
-	_stop_character_talking()
-
 	text_node.visible_characters = -1
 
-	var time_to_disappear: float = ProjectSettings.get_setting(SimpleDialogSettings.WAIT_TIME_AFTER_LINE_MS)
+	var time_to_disappear: float = _calculate_time_to_disappear()
 	$Timer.start(time_to_disappear/1000)
 	$Timer.timeout.connect(_on_dialog_finished)
+	_stop_character_talking()
 	say_visible.emit()
 
 
 func _calculate_time_to_disappear() -> float:
-	return (_get_number_of_words() / _reading_speed_in_wpm as float) * 60
+	return (_get_number_of_words() / _reading_speed_in_wpm as float) * 60.0
 
 
 func _get_number_of_words() -> int:

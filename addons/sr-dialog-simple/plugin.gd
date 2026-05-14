@@ -40,10 +40,6 @@ func _disable_plugin():
 	ESCProjectSettingsManager.remove_setting(
 		SimpleDialogSettings.TEXT_TIME_PER_LETTER_MS_FAST
 	)
-	
-	ESCProjectSettingsManager.remove_setting(
-		SimpleDialogSettings.WAIT_TIME_AFTER_LINE_MS
-	)
 
 	ESCProjectSettingsManager.remove_setting(
 		SimpleDialogSettings.CLEAR_TEXT_BY_CLICK_ONLY
@@ -97,14 +93,6 @@ func _enable_plugin():
 		ESCProjectSettingsManager.register_setting(
 			SimpleDialogSettings.TEXT_TIME_PER_LETTER_MS_FAST,
 			SimpleDialogSettings.TEXT_TIME_PER_LETTER_MS_FAST_DEFAULT_VALUE,
-			{
-				"type": TYPE_FLOAT
-			}
-		)
-		
-		ESCProjectSettingsManager.register_setting(
-			SimpleDialogSettings.WAIT_TIME_AFTER_LINE_MS,
-			SimpleDialogSettings.WAIT_TIME_AFTER_LINE_MS_DEFAULT_VALUE,
 			{
 				"type": TYPE_FLOAT
 			}
