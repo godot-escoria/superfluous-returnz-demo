@@ -239,9 +239,9 @@ init_gap = 60.0
 
 [node name="north" type="PanelContainer" parent="." unique_id=785291810]
 layout_mode = 0
-offset_left = -74.0
+offset_left = -248.0
 offset_top = -373.0
-offset_right = 426.0
+offset_right = 252.0
 offset_bottom = -223.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_lj5o3")
 

@@ -22,22 +22,22 @@ func generate_random_anim():
 	for i in range(50):
 		var head_displacement: Vector2 = Vector2(0,0)
 		if randi() % 3 == 0:
-			var radius: float = 3.5
-			var direction: float = randf_range(0.0, 2*PI);
-			var length: float = randf_range(radius / 2.0, radius);
+			var radius: float = 2.0
+			var direction: float = randf_range(0.0, 2*PI)
+			var length: float = randf_range(radius / 2.0, radius)
 			head_displacement = Vector2(length * cos(direction), length * sin(direction))
 		head_displacements.push_back(head_displacement)
 		mouth_frames.push_back(randi_range(from_frame, from_frame + hframes - 1))
 
-	
 func change_frame() -> void:
-	head.position = head.position + head_displacements[frame_counter]
+	if initial_head_pos.distance_to(head.position + head_displacements[frame_counter]) < 3.0: 
+		head.position = head.position + head_displacements[frame_counter]
 	mouth.frame = mouth_frames[frame_counter]
 	frame_counter += 1
 	$Timer.start()
 
 
-func _on_sophie_started_talking(dir: int) -> void:
+func start_talking(dir: int) -> void:
 	direction = dir
 	initial_head_pos = head.position
 	

@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://cx1isfaoljwyg"]
+[gd_scene format=3 uid="uid://coerjjuby0frq"]
 
-[ext_resource type="Script" uid="uid://lawwavtur6u7" path="res://addons/sr-dialog-simple/types/avatar.gd" id="1_tpsbd"]
+[ext_resource type="Script" uid="uid://cytar6efhg6rk" path="res://addons/sr-dialog-simple/types/avatar.gd" id="1_q3nyl"]
 
 [node name="dialog_box" type="Window"]
 position = Vector2i(0, 36)
@@ -9,7 +9,7 @@ visible = false
 unresizable = true
 borderless = true
 popup_window = true
-script = ExtResource("1_tpsbd")
+script = ExtResource("1_q3nyl")
 
 [node name="Timer" type="Timer" parent="."]
 

@@ -1,15 +1,15 @@
-[gd_scene format=3 uid="uid://bb7b8pp6vdf3p"]
+[gd_scene format=3 uid="uid://m2tml00lohyo"]
 
-[ext_resource type="FontFile" uid="uid://d1drkctykd7eg" path="res://addons/sr-dialog-simple/fonts/TovariSans.ttf" id="1_main2"]
-[ext_resource type="Script" uid="uid://f887tp4d04mv" path="res://addons/sr-dialog-simple/types/floating.gd" id="2_ebyun"]
+[ext_resource type="FontFile" uid="uid://dw0le1qo4dwjx" path="res://addons/sr-dialog-simple/fonts/TovariSans.ttf" id="1_yrks4"]
+[ext_resource type="Script" uid="uid://dkv58cu2qewvs" path="res://addons/sr-dialog-simple/types/floating.gd" id="2_w33v6"]
 
 [node name="dialog_label" type="RichTextLabel" unique_id=2079377558]
-offset_right = 962.0
+offset_right = 837.0
 offset_bottom = 60.0
-theme_override_fonts/normal_font = ExtResource("1_main2")
+theme_override_fonts/normal_font = ExtResource("1_yrks4")
 theme_override_font_sizes/normal_font_size = 50
 bbcode_enabled = true
 text = "Here be some text."
-script = ExtResource("2_ebyun")
+script = ExtResource("2_w33v6")
 
 [node name="Timer" type="Timer" parent="." unique_id=511442448]
