@@ -1,5 +1,64 @@
-:use | TK
-	say($current_player, "I can't use this!")
+# Default answers: Sosage init.yaml "default:" section (English locale).
+# Like the original, one of the lines is picked at random.
 
-:pickup | TK
-	say($current_player, "I can't take this!")
+:look | TK
+	global default_reply = 0
+	rand_global("default_reply", 3)
+	if default_reply == 0:
+		say($current_player, "Fascinating.")
+	elif default_reply == 1:
+		say($current_player, "It's very interesting.")
+	elif default_reply == 2:
+		say($current_player, "Mmh...")
+	else:
+		say($current_player, "I see.")
+
+:move | TK
+	global default_reply = 0
+	rand_global("default_reply", 4)
+	if default_reply == 0:
+		say($current_player, "No.")
+	elif default_reply == 1:
+		say($current_player, "It doesn't move.")
+	elif default_reply == 2:
+		say($current_player, "Impossible.")
+	elif default_reply == 3:
+		say($current_player, "I don't want to move this.")
+	else:
+		say($current_player, "It's no use.")
+
+:take | TK
+	global default_reply = 0
+	rand_global("default_reply", 3)
+	if default_reply == 0:
+		say($current_player, "No.")
+	elif default_reply == 1:
+		say($current_player, "I do not want it.")
+	elif default_reply == 2:
+		say($current_player, "I can't take this.")
+	else:
+		say($current_player, "To do what?")
+
+:use | TK
+	global default_reply = 0
+	rand_global("default_reply", 3)
+	if default_reply == 0:
+		say($current_player, "No.")
+	elif default_reply == 1:
+		say($current_player, "I can't.")
+	elif default_reply == 2:
+		say($current_player, "This won't work.")
+	else:
+		say($current_player, "It's no use.")
+
+:combine | TK
+	global default_reply = 0
+	rand_global("default_reply", 3)
+	if default_reply == 0:
+		say($current_player, "No.")
+	elif default_reply == 1:
+		say($current_player, "I can't.")
+	elif default_reply == 2:
+		say($current_player, "This won't work.")
+	else:
+		say($current_player, "It's no use.")

@@ -3,8 +3,11 @@
 	change_scene("res://game/rooms/intro/intro_room.tscn", false)
 
 	# When control is passed back after the logo, start the music
-	play_snd("res://game/sfx/Game-Menu_Looping.mp3", _music)
+	play_snd("res://game/sfx/Game-Menu_Looping.ogg", _music)
 
 :newgame
+	# Sophie walks in with her intro the first time
+	global intro_done = false
+
 	# Start room desk
 	change_scene("res://game/rooms/desk.tscn")

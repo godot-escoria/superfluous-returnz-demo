@@ -126,12 +126,12 @@ mirrored = false
 
 [sub_resource type="Resource" id="25"]
 script = ExtResource("3")
-animation = "speak_up"
+animation = "speak_left"
 mirrored = false
 
 [sub_resource type="Resource" id="26"]
 script = ExtResource("3")
-animation = "speak_up"
+animation = "speak_right"
 mirrored = false
 
 [sub_resource type="Resource" id="27"]
@@ -141,27 +141,27 @@ mirrored = false
 
 [sub_resource type="Resource" id="28"]
 script = ExtResource("3")
-animation = "speak_down"
+animation = "speak_right"
 mirrored = false
 
 [sub_resource type="Resource" id="29"]
 script = ExtResource("3")
-animation = "speak_down"
+animation = "speak_right"
 mirrored = false
 
 [sub_resource type="Resource" id="30"]
 script = ExtResource("3")
-animation = "speak_down"
+animation = "speak_left"
 mirrored = false
 
 [sub_resource type="Resource" id="31"]
 script = ExtResource("3")
-animation = "speak_right"
-mirrored = true
+animation = "speak_left"
+mirrored = false
 
 [sub_resource type="Resource" id="32"]
 script = ExtResource("3")
-animation = "speak_up"
+animation = "speak_left"
 mirrored = false
 
 [resource]
