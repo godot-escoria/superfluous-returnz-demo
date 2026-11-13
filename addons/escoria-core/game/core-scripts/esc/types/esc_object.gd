@@ -1,51 +1,80 @@
-extends RefCounted
-# An object handled in Escoria
+## Represents an object that is able to be handled by Escoria.
 class_name ESCObject
+extends RefCounted
 
+const ESC_EVENTS_CONTAINER_SCRIPT := preload(
+	"res://addons/escoria-core/game/core-scripts/esc/types/esc_events_container.gd"
+)
 
-# Default object state
+## Default object state.
 const STATE_DEFAULT: String = "default"
 
 
-# The global id of the object
+## The global id of the object.
 var global_id: String
 
-# Whether the object is active (visible to the player)
+## Whether the object is active (i.e. is actually visible to the player).
 var active: bool = true: set = _set_active
 
-# Whether the object is interactive (clickable by the player)
+## Whether the object is interactive (i.e. is clickable by the player).
 var interactive: bool = true: get = _get_interactive, set = _set_interactive
 
-# The state of the object. If the object has a respective animation,
-# it will be played
+## The state of the object. If the object has a respective animation,
+## it will be played.
 var state: String = STATE_DEFAULT:
 	get = get_state
 
-# The events registered with the object
-var events: Dictionary = {}
+## The events registered with the object
+var events = ESC_EVENTS_CONTAINER_SCRIPT.new()
 
-# The node in the scene. Can be an ESCItem or an ESCCamera
+## The node representing the object in the scene.
 var node: Node
 
+## Variable that stores the Callable method to unregister the object from Object Manager
+var unregister_object_callback: Callable
 
+## Initializes the ESCObject with a global id and node.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |p_global_id|`String`|The global id of the object.|yes|[br]
+## |p_node|`Node`|The node in the scene.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _init(p_global_id: String, p_node: Node):
 	global_id = p_global_id
 	node = p_node
 
 
-# Get the current state
-#
-# *Returns* the current state
+## Gets the current state.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `String` value. (`String`)
 func get_state() -> String:
 	return state
 
 
-# Set the state and start a possible animation
-#
-# #### Parameters
-#
-# - p_state: State to set
-# - immediate: If true, skip directly to the end
+## Set the state and start a possible animation.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |p_state|`String`|The state in which this object should placed.|yes|[br]
+## |immediate|`bool`|If true, skips any animation directly to its end.|no|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func set_state(p_state: String, immediate: bool = false):
 	state = p_state
 
@@ -78,37 +107,62 @@ func set_state(p_state: String, immediate: bool = false):
 				)
 
 
-# Set the active value, thus hiding or showing the object
-#
-# #### Parameters
-#
-# - value: Value to set
+## Sets the active value, thus hiding or showing the object.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |value|`bool`|A boolean determining whether the object should become active or inactive.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _set_active(value: bool):
 	active = value
 	self.node.visible = value
 
 
-# Returns whether the object is active
-#
-# *Returns* true iff the object is active
+## Whether the object is active.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns whether the object is active. (`bool`)
 func is_active() -> bool:
 	return active
 
 
-# Get the interactive value from the node
-#
-# **Returns** Whether the node is interactive or not
+## Gets the interactive value from the node.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns Whether the node is interactive or not. (`bool`)
 func _get_interactive() -> bool:
 	if is_instance_valid(self.node) and "is_interactive" in self.node:
 		return self.node.is_interactive
-	else:
-		return true
+
+	return true
 
 
-# Set the interactive value in the node
-#
-# #### Parameters
-# - value: Whether the object is interactive or not
+## Sets the interactive value in the node.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |value|`bool`|Whether the object is interactive or not.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _set_interactive(value: bool):
 	if "is_interactive" in self.node:
 		self.node.is_interactive = value
@@ -117,33 +171,81 @@ func _set_interactive(value: bool):
 			escoria.inputs_manager.on_item_non_interactive(self.node)
 
 
-# Return the data of the object to be inserted in a savegame file.
-#
-# **Returns**
-# A dictionary containing the data to be saved for this object.
+## Return the data of the object to be inserted in a savegame file.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `Dictionary` value. (`Dictionary`)
 func get_save_data() -> Dictionary:
 	var save_data: Dictionary = {}
-
-	if self.global_id == "player" and not is_instance_valid(self.node):
-		return save_data
 
 	save_data["active"] = self.active
 	save_data["interactive"] = self.interactive
 	save_data["state"] = self.state
 
-	if is_instance_valid(self.node):
-		if self.node.get("is_movable") and self.node.is_movable:
-			save_data["global_transform"] = self.node.global_transform
-			save_data["last_deg"] = wrapi(self.node._movable._get_angle() - 90 + 1, 0, 360)
-			save_data["last_dir"] = self.node._movable.last_dir
-		if self.node.has_method("get_custom_data"):
-			save_data["custom_data"] = self.node.get_custom_data()
+	# Retained room state can outlive its scene nodes.
+	if not is_instance_valid(self.node):
+		return save_data
 
-	if self.global_id in ["_music", "_sound"] and self.node.get("state"):
+	if self.node is ESCItem:
+		if self.node.animations != null:
+			save_data["animations_resource_path"] = (self.node as ESCItem).animations.resource_path
+			var animation_player = (self.node as ESCItem).get_animation_player()
+			if is_instance_valid(animation_player):
+				save_data["current_animation"] = animation_player.get_current_animation()
+
+	if self.node.get("is_movable") and self.node.is_movable:
+		save_data["global_transform"] = self.node.global_transform
+		save_data["last_deg"] = wrapi(self.node._movable._get_angle() - 90 + 1, 0, 360)
+		save_data["last_dir"] = self.node._movable.last_dir
+		save_data["speed"] = self.node.speed
+	if self.node.has_method("get_custom_data"):
+		save_data["custom_data"] = self.node.get_custom_data()
+
+	if self.global_id in [ESCObjectManager.MUSIC, ESCObjectManager.SOUND, ESCObjectManager.AMBIENT] and self.node.get("state"):
 		save_data["state"] = self.node.get("state")
-		save_data["playback_position"] = self.node.get_playback_position()
+		if ESCProjectSettingsManager.has_setting(
+				ESCProjectSettingsManager.SAVE_SOUNDS_PLAYBACK_POSITION
+				) and ESCProjectSettingsManager.get_setting(
+				ESCProjectSettingsManager.SAVE_SOUNDS_PLAYBACK_POSITION
+			):
+			save_data["playback_position"] = self.node.get_playback_position()
 
-	if self.global_id == "_camera":
+	if self.global_id == ESCObjectManager.CAMERA:
 		save_data["target"] = self.node.get("_follow_target").global_id
+		var camera_limit_id = escoria.main.get_camera_limit_id_for_room(escoria.main.current_scene)
+		if camera_limit_id != null:
+			save_data["limit_id"] = camera_limit_id
 
 	return save_data
+
+
+## Determines whether the specified events list contains an event with the[br]
+## specified event name and event target, e.g. `:give "filled_out_form"`[br]
+##[br]
+## #### Parameters[br]
+##[br]
+## - event_name: the event name to search for[br]
+## - event_target: the target for the specified event to check; may be null[br]
+##[br]
+## *Returns* true iff events contains an event matching both event_name and event_target
+func has_event_with_target(event_name: String, event_target = null) -> bool:
+	return events.has_event_with_target(event_name, event_target)
+
+
+## Returns the event matching the specified event name and target, e.g. `:give "filled_out_form"`[br]
+## if it exists; returns null otherwise.[br]
+##[br]
+## #### Parameters[br]
+##[br]
+## - event_name: the event name to search for[br]
+## - event_target: the target for the specified event to check; may be null[br]
+##[br]
+## *Returns* the event in `events` iff `events` contains an event matching both `event_name` and `event_target`;[br]
+## returns null otherwise.
+func get_event_with_target(event_name: String, event_target = null):
+	return events.get_event_with_target(event_name, event_target)

@@ -1,0 +1,60 @@
+[gd_scene load_steps=5 format=3 uid="uid://ciy2hn83a3rim"]
+
+[ext_resource type="Script" uid="uid://cmyyk7qinkift" path="res://game/ui/inventory/inventory_ui.gd" id="1"]
+[ext_resource type="Script" uid="uid://c4syt26p7mg66" path="res://addons/escoria-core/ui_library/inventory/esc_inventory_container.gd" id="3"]
+[ext_resource type="Texture2D" uid="uid://dl5wnslgyer8m" path="res://game/images/interface/chanfrein.png" id="4"]
+[ext_resource type="FontFile" uid="uid://bhu74l6fshmm4" path="res://game/fonts/PTN77F.ttf" id="5"]
+
+[node name="inventory_ui" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
+script = ExtResource("1")
+inventory_ui_container = NodePath("panel/container")
+
+[node name="panel" type="Control" parent="."]
+anchors_preset = 0
+offset_top = 1130.0
+offset_right = 1920.0
+offset_bottom = 1280.0
+mouse_filter = 2
+
+[node name="background" type="ColorRect" parent="panel"]
+offset_right = 1920.0
+offset_bottom = 150.0
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="tab" type="ColorRect" parent="panel"]
+offset_top = -50.0
+offset_right = 200.0
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="label" type="Label" parent="panel/tab"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_fonts/font = ExtResource("5")
+theme_override_font_sizes/font_size = 40
+text = "Inventory"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="chamfer" type="TextureRect" parent="panel"]
+offset_left = 200.0
+offset_top = -50.0
+offset_right = 235.0
+mouse_filter = 2
+texture = ExtResource("4")
+
+[node name="container" type="HBoxContainer" parent="panel"]
+offset_left = 198.5
+offset_top = 24.5
+offset_right = 1820.0
+offset_bottom = 125.5
+mouse_filter = 2
+theme_override_constants/separation = 25
+script = ExtResource("3")

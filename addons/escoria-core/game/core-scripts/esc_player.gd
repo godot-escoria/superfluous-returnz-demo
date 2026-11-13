@@ -1,24 +1,37 @@
 @tool
 @icon("res://addons/escoria-core/design/esc_player.svg")
-# A playable character
-extends ESCItem
+## An Escoria playable character.
 class_name ESCPlayer
+extends ESCItem
 
 
 ## Whether the player can be hovered over and actions performed on like an item.
 ## This allows the user to perform actions or use items on the player character.
 @export var selectable: bool = false
 
-
-# A player is always movable
+## Constructor method.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _init():
+	# A player is always movable
 	is_movable = true
 	_force_registration = true
 
 
-# Ready function
+## Ready method.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _ready():
-	if selectable or is_movable:
-		super()
-	else:
-		tooltip_name = ""
+	super()

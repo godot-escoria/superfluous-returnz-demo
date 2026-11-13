@@ -1,9 +1,9 @@
-[gd_scene load_steps=35 format=3 uid="uid://ddlsoeh0nu5dg"]
+[gd_scene load_steps=42 format=3 uid="uid://ddlsoeh0nu5dg"]
 
 [ext_resource type="Script" uid="uid://c7fcpp72w3dnj" path="res://addons/escoria-core/game/core-scripts/esc_room.gd" id="1_6gn6i"]
 [ext_resource type="PackedScene" uid="uid://d4dsojig28vcs" path="res://game/characters/sophie.tscn" id="2_1c5ds"]
 [ext_resource type="Script" uid="uid://5pbcieq7gpdo" path="res://addons/escoria-core/game/core-scripts/esc_terrain.gd" id="2_qwppr"]
-[ext_resource type="Texture2D" uid="uid://bupooip3do6c2" path="res://game/images/backgrounds/bureau_map.png" id="3_gnty4"]
+[ext_resource type="Texture2D" path="res://game/images/backgrounds/bureau_scale.png" id="3_gnty4"]
 [ext_resource type="Script" uid="uid://fnwnfflaoeqp" path="res://addons/escoria-core/game/core-scripts/esc_background.gd" id="3_ims18"]
 [ext_resource type="Texture2D" uid="uid://cmy4ns8rge54q" path="res://game/images/backgrounds/bureau.png" id="3_uwoij"]
 [ext_resource type="Script" uid="uid://dshelmw7y44qg" path="res://addons/escoria-core/game/core-scripts/esc_item.gd" id="6_kg4gr"]
@@ -26,10 +26,15 @@
 [ext_resource type="Script" uid="uid://chu4bvqgwxuts" path="res://addons/escoria-core/game/core-scripts/esc_interaction_location.gd" id="19_r0cw4"]
 [ext_resource type="Script" uid="uid://beh3ds4eapldu" path="res://addons/escoria-core/game/core-scripts/esc_location.gd" id="21_koxl6"]
 
+[ext_resource type="Texture2D" path="res://game/images/objects/clef_usb.png" id="50_usbobj"]
+[ext_resource type="Texture2D" path="res://game/images/inventory/clef_usb.png" id="51_usbinv"]
+[ext_resource type="Texture2D" path="res://game/images/inventory/tisonnier.png" id="52_tisinv"]
+[ext_resource type="Texture2D" path="res://game/images/animations/passage_secret.png" id="53_passage"]
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_ot85j"]
-vertices = PackedVector2Array(970.781, 757.969, 970.773, 757.961, 1034.47, 753.062, 1895.48, 1052.03, 33.5938, 1057.95, 42.1562, 1021.04, 802.398, 924.648, 1739.99, 899.273, 848.391, 896.352, 1274.26, 827.93, 622.172, 779.938, 165.406, 823.148, 162.602, 805.352, 893.672, 763.977, 822.109, 805.703, 844.812, 843.938, 1806.92, 875.281, 1903.56, 891.391, 1264.2, 794.75)
-polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2), PackedInt32Array(3, 4, 5, 6), PackedInt32Array(7, 3, 6, 8, 9), PackedInt32Array(10, 11, 12), PackedInt32Array(10, 12, 13), PackedInt32Array(14, 10, 13), PackedInt32Array(15, 14, 13), PackedInt32Array(16, 17, 3, 7), PackedInt32Array(13, 0, 2, 18, 9, 8, 15)])
+vertices = PackedVector2Array(1905.0, 1062.0, 21.0, 1068.0, 34.0, 1012.0, 799.0, 915.0, 1739.0, 889.0, 838.0, 891.0, 1282.0, 819.0, 157.0, 834.0, 151.0, 796.0, 893.0, 754.0, 622.0, 790.0, 816.0, 815.0, 1806.0, 865.0, 1914.0, 883.0, 970.0, 748.0, 1035.0, 743.0, 1272.0, 786.0, 835.0, 847.0)
+polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3), PackedInt32Array(4, 0, 3, 5, 6), PackedInt32Array(7, 8, 9, 10), PackedInt32Array(11, 10, 9), PackedInt32Array(12, 13, 0, 4), PackedInt32Array(9, 14, 15, 16, 6, 5, 17), PackedInt32Array(9, 17, 11)])
 outlines = Array[PackedVector2Array]([PackedVector2Array(151, 796, 157, 834, 622, 790, 816, 815, 835, 847, 838, 891, 799, 915, 34, 1012, 21, 1068, 1905, 1062, 1914, 883, 1806, 865, 1739, 889, 1282, 819, 1272, 786, 1035, 743, 970, 748, 893, 754)])
+agent_radius = 0.0
 
 [sub_resource type="Animation" id="Animation_oqdvn"]
 length = 0.001
@@ -111,7 +116,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.5),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(960, 483), Vector2(822, 501)]
+"values": [Vector2(960, 483), Vector2(741, 504)]
 }
 
 [sub_resource type="Animation" id="Animation_6u7bx"]
@@ -135,6 +140,45 @@ _data = {
 &"RESET": SubResource("Animation_pdbxi"),
 &"move_left": SubResource("Animation_o38ao"),
 &"move_right": SubResource("Animation_6u7bx")
+}
+
+[sub_resource type="Animation" id="Animation_passage_open"]
+resource_name = "open"
+length = 0.92
+step = 0.0833
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.0833, 0.1667, 0.25, 0.3333, 0.4167, 0.5, 0.5833, 0.6667, 0.75, 0.8333),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+}
+
+[sub_resource type="Animation" id="Animation_passage_opened"]
+resource_name = "opened"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [10]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_passage"]
+_data = {
+&"open": SubResource("Animation_passage_open"),
+&"opened": SubResource("Animation_passage_opened")
 }
 
 [node name="desk" type="Node2D"]
@@ -194,6 +238,9 @@ process_mode = 1
 position = Vector2(-368, -826)
 script = ExtResource("6_kg4gr")
 global_id = "computer"
+interaction_angle = 180
+esc_script = "res://game/rooms/bureau/computer.ash"
+tooltip_name = "Computer"
 combine_when_selected_action_is_in = PackedStringArray()
 hover_enabled = true
 hover_modulate = Color(0.501407, 0.501406, 0.501406, 1)
@@ -212,12 +259,14 @@ process_mode = 1
 position = Vector2(-368, -826)
 script = ExtResource("6_kg4gr")
 global_id = "bottle"
-esc_script = "res://game/rooms/bottle.ash"
+esc_script = "res://game/rooms/bureau/bottle.ash"
+tooltip_name = "Bottle"
 combine_when_selected_action_is_in = PackedStringArray()
 hover_enabled = true
 hover_modulate = Color(0.501961, 0.501961, 0.501961, 1)
 inventory_texture = ExtResource("12_uro0m")
 inventory_texture_hovered = ExtResource("12_uro0m")
+metadata/verb_labels = {"move": "Push", "use": "Drink", "combine": "Pour on"}
 
 [node name="Sprite2D" type="Sprite2D" parent="items/desk/bottle"]
 position = Vector2(358, 668)
@@ -231,6 +280,9 @@ process_mode = 1
 position = Vector2(-368, -826)
 script = ExtResource("6_kg4gr")
 global_id = "documents"
+interaction_angle = 180
+esc_script = "res://game/rooms/bureau/documents.ash"
+tooltip_name = "Documents"
 combine_when_selected_action_is_in = PackedStringArray()
 hover_enabled = true
 hover_modulate = Color(0.501961, 0.501961, 0.501961, 1)
@@ -250,11 +302,14 @@ z_index = -1
 position = Vector2(380, -18)
 script = ExtResource("6_kg4gr")
 global_id = "trashbin"
+esc_script = "res://game/rooms/bureau/trashbin.ash"
+tooltip_name = "Wastepaper basket"
 combine_when_selected_action_is_in = PackedStringArray()
 hover_enabled = true
 hover_modulate = Color(0.501407, 0.501406, 0.501406, 1)
 inventory_texture = ExtResource("8_a24ej")
 inventory_texture_hovered = ExtResource("8_a24ej")
+metadata/verb_labels = {"move": "Push", "take": "Rummage in"}
 
 [node name="Sprite2D" type="Sprite2D" parent="items/desk/trashbin"]
 texture = ExtResource("8_a24ej")
@@ -268,14 +323,17 @@ visible = false
 position = Vector2(0, -1)
 script = ExtResource("6_kg4gr")
 global_id = "safe"
+esc_script = "res://game/rooms/bureau/safe.ash"
+tooltip_name = "Safe"
 combine_when_selected_action_is_in = PackedStringArray()
 hover_enabled = true
 hover_modulate = Color(0.501961, 0.501961, 0.501961, 1)
 inventory_texture = ExtResource("14_7k8hs")
 inventory_texture_hovered = ExtResource("14_7k8hs")
+metadata/verb_labels = {"move": "Open"}
 
 [node name="Sprite2D" type="Sprite2D" parent="items/safe"]
-position = Vector2(112, 335)
+position = Vector2(109, 350)
 texture = ExtResource("14_7k8hs")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="items/safe"]
@@ -291,6 +349,8 @@ process_mode = 1
 position = Vector2(127, 357)
 script = ExtResource("6_kg4gr")
 global_id = "painting"
+esc_script = "res://game/rooms/bureau/painting.ash"
+tooltip_name = "Painting"
 combine_when_selected_action_is_in = PackedStringArray()
 hover_enabled = true
 hover_modulate = Color(0.501407, 0.501406, 0.501406, 1)
@@ -298,6 +358,7 @@ inventory_texture = ExtResource("10_oqqx4")
 inventory_texture_hovered = ExtResource("10_oqqx4")
 
 [node name="Sprite2D" type="Sprite2D" parent="items/painting"]
+position = Vector2(-2, 13.5)
 texture = ExtResource("10_oqqx4")
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="items/painting"]
@@ -307,9 +368,12 @@ polygon = PackedVector2Array(-84, -101, -82, 96, 91, 103, 83, -100, -54, -110)
 process_mode = 1
 script = ExtResource("6_kg4gr")
 global_id = "window"
+esc_script = "res://game/rooms/bureau/window.ash"
+tooltip_name = "Window"
 combine_when_selected_action_is_in = PackedStringArray()
 hover_enabled = true
 hover_modulate = Color(0.501407, 0.501406, 0.501406, 1)
+metadata/verb_labels = {"move": "Open"}
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="items/window"]
 polygon = PackedVector2Array(256, 175, 261, 549, 336, 553, 331, 601, 499, 605, 531, 199, 388, 178)
@@ -319,11 +383,14 @@ process_mode = 1
 position = Vector2(973, 549)
 script = ExtResource("6_kg4gr")
 global_id = "keyhole"
+esc_script = "res://game/rooms/bureau/keyhole.ash"
+tooltip_name = "Small lock"
 combine_when_selected_action_is_in = PackedStringArray()
 hover_enabled = true
 hover_modulate = Color(0.501961, 0.501961, 0.501961, 1)
 inventory_texture = ExtResource("11_c3wm4")
 inventory_texture_hovered = ExtResource("11_c3wm4")
+metadata/verb_labels = {"move": "Use"}
 
 [node name="Sprite2D" type="Sprite2D" parent="items/keyhole"]
 texture = ExtResource("11_c3wm4")
@@ -336,7 +403,8 @@ process_mode = 1
 position = Vector2(960, 483)
 script = ExtResource("6_kg4gr")
 global_id = "plant"
-esc_script = "res://game/rooms/plant.ash"
+esc_script = "res://game/rooms/bureau/plant.ash"
+tooltip_name = "Foliage plant"
 combine_when_selected_action_is_in = PackedStringArray()
 hover_enabled = true
 hover_modulate = Color(0.501407, 0.501406, 0.501406, 1)
@@ -363,6 +431,9 @@ process_mode = 1
 position = Vector2(1540, 434)
 script = ExtResource("6_kg4gr")
 global_id = "gnustatue"
+interaction_angle = 180
+esc_script = "res://game/rooms/bureau/gnustatue.ash"
+tooltip_name = "Bust of Gonzague von Gnu"
 combine_when_selected_action_is_in = PackedStringArray()
 hover_enabled = true
 hover_modulate = Color(0.501407, 0.501406, 0.501406, 1)
@@ -379,11 +450,15 @@ polygon = PackedVector2Array(-87, -18, -65, -25, -62, -119, -8, -124, 25, -129, 
 process_mode = 1
 script = ExtResource("6_kg4gr")
 global_id = "poker"
+interaction_angle = 180
+esc_script = "res://game/rooms/bureau/poker.ash"
+tooltip_name = "Poker"
 combine_when_selected_action_is_in = PackedStringArray()
 hover_enabled = true
 hover_modulate = Color(0.501961, 0.501961, 0.501961, 1)
-inventory_texture = ExtResource("19_m7hod")
-inventory_texture_hovered = ExtResource("19_m7hod")
+inventory_texture = ExtResource("52_tisinv")
+inventory_texture_hovered = ExtResource("52_tisinv")
+metadata/verb_labels = {"use": "Clean up", "combine": "Insert in"}
 
 [node name="Sprite2D" type="Sprite2D" parent="items/poker"]
 position = Vector2(1657, 761)
@@ -418,13 +493,109 @@ inventory_texture_hovered = ExtResource("16_bbion")
 [node name="Sprite2D" type="Sprite2D" parent="items/chair3"]
 texture = ExtResource("17_53src")
 
+
+[node name="usb_key" type="Area2D" parent="items"]
+process_mode = 1
+z_index = 1
+position = Vector2(122, 432.5)
+script = ExtResource("6_kg4gr")
+global_id = "usb_key"
+esc_script = "res://game/rooms/bureau/usb_key.ash"
+tooltip_name = "USB stick"
+combine_when_selected_action_is_in = PackedStringArray()
+inventory_texture = ExtResource("51_usbinv")
+inventory_texture_hovered = ExtResource("51_usbinv")
+metadata/verb_labels = {"combine": "Plug in"}
+
+[node name="Sprite2D" type="Sprite2D" parent="items/usb_key"]
+texture = ExtResource("50_usbobj")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="items/usb_key"]
+polygon = PackedVector2Array(-50, -32, 50, -32, 50, 32, -50, 32)
+
+[node name="ESCInteractionLocation" type="Marker2D" parent="items/usb_key"]
+position = Vector2(58, 377.5)
+script = ExtResource("19_r0cw4")
+
+[node name="secret_passage" type="Area2D" parent="items"]
+process_mode = 1
+position = Vector2(1163, 503)
+script = ExtResource("6_kg4gr")
+global_id = "secret_passage"
+esc_script = "res://game/rooms/bureau/secret_passage.ash"
+tooltip_name = "Secret passage"
+is_exit = true
+combine_when_selected_action_is_in = PackedStringArray()
+metadata/goto = "right"
+
+[node name="Sprite2D" type="Sprite2D" parent="items/secret_passage"]
+texture = ExtResource("53_passage")
+hframes = 11
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="items/secret_passage"]
+libraries = {
+&"": SubResource("AnimationLibrary_passage")
+}
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="items/secret_passage"]
+polygon = PackedVector2Array(-90, -235, 85, -235, 85, 241, -90, 241)
+
+[node name="ESCInteractionLocation" type="Marker2D" parent="items/secret_passage"]
+position = Vector2(-41, 264)
+script = ExtResource("19_r0cw4")
+
 [node name="start" type="Marker2D" parent="."]
 position = Vector2(2046, 932)
 script = ExtResource("21_koxl6")
 global_id = "start"
 is_start_location = true
 
+[node name="from_flug" type="Marker2D" parent="."]
+position = Vector2(1100, 775)
+script = ExtResource("21_koxl6")
+global_id = "from_flug"
+
 [node name="intro_start_point" type="Marker2D" parent="."]
 position = Vector2(1008, 846)
 script = ExtResource("21_koxl6")
 global_id = "intro_start_point"
+
+[node name="ESCInteractionLocation" type="Marker2D" parent="items/desk/computer"]
+position = Vector2(196, 815)
+script = ExtResource("19_r0cw4")
+
+[node name="ESCInteractionLocation" type="Marker2D" parent="items/desk/bottle"]
+position = Vector2(414, 795)
+script = ExtResource("19_r0cw4")
+
+[node name="ESCInteractionLocation" type="Marker2D" parent="items/desk/documents"]
+position = Vector2(478, 796)
+script = ExtResource("19_r0cw4")
+
+[node name="ESCInteractionLocation" type="Marker2D" parent="items/desk/trashbin"]
+position = Vector2(98, 43)
+script = ExtResource("19_r0cw4")
+
+[node name="ESCInteractionLocation" type="Marker2D" parent="items/safe"]
+position = Vector2(180, 811)
+script = ExtResource("19_r0cw4")
+
+[node name="ESCInteractionLocation" type="Marker2D" parent="items/painting"]
+position = Vector2(53, 453)
+script = ExtResource("19_r0cw4")
+
+[node name="ESCInteractionLocation" type="Marker2D" parent="items/window"]
+position = Vector2(516, 780)
+script = ExtResource("19_r0cw4")
+
+[node name="ESCInteractionLocation" type="Marker2D" parent="items/keyhole"]
+position = Vector2(117, 208)
+script = ExtResource("19_r0cw4")
+
+[node name="ESCInteractionLocation" type="Marker2D" parent="items/gnustatue"]
+position = Vector2(-186, 413)
+script = ExtResource("19_r0cw4")
+
+[node name="ESCInteractionLocation" type="Marker2D" parent="items/poker"]
+position = Vector2(1596, 875)
+script = ExtResource("19_r0cw4")

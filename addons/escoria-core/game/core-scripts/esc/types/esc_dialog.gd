@@ -1,61 +1,33 @@
-# An ESC dialog
-extends ESCStatement
+## Represents a dialog in Escoria.
 class_name ESCDialog
+extends ESCStatement
 
 
-# Regex that matches dialog lines
-const REGEX = \
-	'^(\\s*)\\?( (?<avatar>[^ ]+))?' +\
-	'( (?<timeout>[^ ]+))?( (?<timeout_option>.+))?$'
-
-
-# A Regex that matches the end of a dialog
-const END_REGEX = \
-	'^(?<indent>\\s*)!.*$'
-
-
-# Avatar used in the dialog
+## Avatar used in the dialog, if any.
 var avatar: String = "-"
 
-# Timeout until the timeout_option option is selected. Use 0 for no timeout
+## Timeout until the timeout_option option is selected. Use 0 for no timeout.
 var timeout: int = 0
 
-# The dialog option to select when timeout is reached
+## The dialog option to select when timeout is reached.
 var timeout_option: int = 0
 
-# A list of ESCDialogOptions
+## Total number of options authored in this dialog, including currently hidden options.
+var authored_options_count: int = 0
+
+## A list of `ESCDialogOption`s.
 var options: Array
 
 
-# Construct a dialog from an ESC dialog string
-#
-# #### Parameters
-# - dialog_string: ESC dialog string
-func load_string(dialog_string: String):
-	var dialog_regex = RegEx.new()
-	dialog_regex.compile(REGEX)
-
-	if dialog_regex.search(dialog_string):
-		for result in dialog_regex.search_all(dialog_string):
-			if "avatar" in result.names:
-				self.avatar = ESCUtils.get_re_group(result, "avatar")
-			if "timeout" in result.names:
-				self.timeout = int(
-					ESCUtils.get_re_group(result, "timeout")
-				)
-			if "timeout_option" in result.names:
-				self.timeout_option = int(
-					ESCUtils.get_re_group(result, "timeout_option")
-				)
-	else:
-		escoria.logger.error(
-			self,
-			"Invalid dialog detected: %s\nDialog regexp didn't match."
-					% dialog_string
-		)
-
-
-# Check if dialog is valid
+## True iff the dialog and its settings are valid.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns true iff the dialog and its settings are valid. (`bool`)
 func is_valid() -> bool:
 	if self.avatar != "-" and not ResourceLoader.exists(self.avatar):
 		escoria.logger.error(
@@ -63,7 +35,11 @@ func is_valid() -> bool:
 			"Avatar scene not found: %s." % self.avatar
 		)
 		return false
-	if self.timeout_option > self.options.size() \
+	var option_count := self.authored_options_count
+	if option_count == 0:
+		option_count = self.options.size()
+
+	if self.timeout_option > option_count \
 			or self.timeout_option < 0:
 		escoria.logger.error(
 			self,
@@ -74,14 +50,49 @@ func is_valid() -> bool:
 	return true
 
 
-# Run this dialog
+## Returns the currently visible option configured as the timeout default, if any.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the currently visible timeout option as an `ESCDialogOption`, or `null` if the configured option is not visible.
+func get_timeout_option() -> ESCDialogOption:
+	var has_source_option_indexes := false
+
+	for option in self.options:
+		if option.source_option_index > 0:
+			has_source_option_indexes = true
+
+		if option.source_option_index == self.timeout_option:
+			return option
+
+	if not has_source_option_indexes \
+			and self.timeout_option > 0 \
+			and self.timeout_option <= self.options.size():
+		return self.options[self.timeout_option - 1]
+
+	return null
+
+
+## Run this dialog. TODO: Although this method overrides its parent version, the return type here does NOT match the parent's signature. Consider either changing the parent's return type to be a `Variant`, or doing something to ensure greater consistency.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the `ESCDialogOption` chosen by the player. (`Variant`)
 func run():
 	escoria.logger.debug(
 		self,
 		"Starting dialog."
 	)
 
-	escoria.current_state = escoria.GAME_STATE.DIALOG
+	escoria.current_state = escoria.GameState.DIALOG
 
 	if !escoria.dialog_player:
 		escoria.dialog_player = escoria.main.current_scene.get_node(
@@ -90,15 +101,14 @@ func run():
 
 	escoria.dialog_player.start_dialog_choices(self)
 
-	var option = (await escoria.dialog_player.option_chosen
+	var option = (
+		await escoria.dialog_player.option_chosen
 	) as ESCDialogOption
-
-	var rc = ESCExecution.RC_OK
 
 	# If no valid option was returned, it means this level of dialog is done.
 	# If this is the case and the current level of dialog has a parent, it means
 	# it is still yielding and so will be shown again.
 
-	escoria.current_state = escoria.GAME_STATE.DEFAULT
+	escoria.current_state = escoria.GameState.DEFAULT
 
 	return option
