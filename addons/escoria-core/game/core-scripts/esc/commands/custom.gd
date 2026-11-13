@@ -1,24 +1,31 @@
-# `custom object node func_name [params...]`
-#
-#
-# Executes the specified Godot function. This function must be in a script
-# attached to a child node of a registered `ESCItem`.
-#
-# **Parameters**
-#
-# - *object*: Global ID of the target `ESCItem`
-# - *node*: Name of the child node of the target `ESCItem`
-# - *func_name*: Name of the function to be called
-# - params: Any arguments to be passed to the function (array and object parameters are not supported).
-# Multiple parameters can be passed by simply passing them in as additional arguments separated by
-# spaces, e.g. `custom the_object the_node the_function arg1 arg2 arg3`
-#
-# @ESC
-extends ESCBaseCommand
+## `custom(object: String, node: String, func_name: String[, params...])`
+##
+## Executes the specified Godot function. This function must be in a script attached to a child node of a registered `ESCItem`.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |object|`String`|Global ID of the target `ESCItem`|yes|[br]
+## |node|`String`|Name of the child node of the target `ESCItem`|yes|[br]
+## |func_name|`String`|Name of the function to be called|yes|[br]
+## |params...|`Variant`|Optional arguments passed to the target function (arrays and objects are not supported). Additional positional parameters can be listed after the required ones, e.g. `custom("the_object", "the_node", "the_function", arg1, arg2)`.|no|[br]
+## [br]
+## @ASHES
+## @COMMAND
 class_name CustomCommand
+extends ESCBaseCommand
 
 
-# Return the descriptor of the arguments of this command
+## The descriptor of the arguments of this command.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the descriptor of the arguments of this command. The argument descriptor for this command. (`ESCCommandArgumentDescriptor`)
 func configure() -> ESCCommandArgumentDescriptor:
 	return ESCCommandArgumentDescriptor.new(
 		3,
@@ -29,7 +36,17 @@ func configure() -> ESCCommandArgumentDescriptor:
 	)
 
 
-# Validate whether the given arguments match the command descriptor
+## Validates whether the given arguments match the command descriptor.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |arguments|`Array`|The arguments to validate.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns True if the arguments are valid, false otherwise. (`bool`)
 func validate(arguments: Array):
 	if not super.validate(arguments):
 		return false
@@ -37,7 +54,7 @@ func validate(arguments: Array):
 	if not escoria.object_manager.has(arguments[0]):
 		raise_invalid_object_error(self, arguments[0])
 		return false
-	elif not escoria.object_manager.get_object(arguments[0]).node.has_node(
+	if not escoria.object_manager.get_object(arguments[0]).node.has_node(
 		arguments[1]
 	):
 		raise_error(self, "Invalid node. Object with global id %s has no child node called %s."
@@ -46,7 +63,7 @@ func validate(arguments: Array):
 						arguments[1],
 					])
 		return false
-	elif not escoria.object_manager.get_object(arguments[0]).node\
+	if not escoria.object_manager.get_object(arguments[0]).node\
 		.get_node(
 			arguments[1]
 		)\
@@ -64,7 +81,17 @@ func validate(arguments: Array):
 	return true
 
 
-# Run the command
+## Runs the command.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |command_params|`Array`|The parameters for the command.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns the execution result code. (`int`)
 func run(command_params: Array) -> int:
 	var object = escoria.object_manager.get_object(
 		command_params[0]
@@ -82,7 +109,15 @@ func run(command_params: Array) -> int:
 	return ESCExecution.RC_OK
 
 
-# Function called when the command is interrupted.
+## Function called when the command is interrupted.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func interrupt():
 	escoria.logger.debug(
 		self,

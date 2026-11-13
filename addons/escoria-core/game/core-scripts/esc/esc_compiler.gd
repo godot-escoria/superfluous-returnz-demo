@@ -1,37 +1,25 @@
-# Compiler of the ESC language
-extends Resource
+## Compiler for the ASHES language.
 class_name ESCCompiler
+extends Resource
 
 
-# This must match ESCProjectSettingsManager.COMMAND_DIRECTORIES.
-# We do not reference it directly to avoid circular dependencies.
+## This must match `ESCProjectSettingsManager.COMMAND_DIRECTORIES`.
+## We do not reference it directly in order to avoid circular dependencies.
 const COMMAND_DIRECTORIES = "escoria/main/command_directories"
 
-# The currently compiled event
-var _current_event = null
 
-# A stack of groups currently compiling
-var _groups_stack = []
-
-# A stack of dialogs currently compiling
-var _dialogs_stack = []
-
-# A stack of dialog options currently compiling
-var _dialogs_option_stack = []
-
-# A pointer to the current container (group, dialog option)
-# that should get the current command
-var _command_container = []
-
-# The currently identified indent
-var _current_indent = 0
-
-# Cache the list of ESC commands available
-var _commands: Array = []
-
+## Whether an error has been encountered during the compilation process.
 var had_error: bool = false
 
-
+## Initialize the ESCCompiler and assure command list preference.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _init():
 	# Assure command list preference
 	# (we use ProjectSettings instead of ESCProjectSettingsManager
@@ -47,6 +35,15 @@ func _init():
 		ProjectSettings.add_property_info(property_info)
 
 
+## Static method to pre-load all ASHES commands from `ESCProjectSettingsManager.COMMAND_DIRECTORIES`. All commands must extend `ESCBaseCommand`.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `Array` value. (`Array`)
 static func load_commands() -> Array:
 	var commands: Array = []
 
@@ -72,7 +69,16 @@ static func load_commands() -> Array:
 	return commands
 
 
-static func load_globals():
+## Static method to load all Escoria reserved objects and reserved globals.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `Dictionary` value. (`Dictionary`)
+static func load_globals() -> Dictionary:
 	var globals: Dictionary = {}
 
 	for obj in ESCObjectManager.RESERVED_OBJECTS:
@@ -84,7 +90,20 @@ static func load_globals():
 	return globals
 
 
-func _compiler_shim(source: String, filename: String = ""):
+## Compile the given ESC source code into an ESCScript object.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |source|`String`|The ESC source code to compile.|yes|[br]
+## |filename|`String`|Optional filename for error reporting.|no|[br]
+## |associated_global_id|`String`|Optional global id associated with the script.|no|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns an `ESCScript` object representing the compiled script.
+func _compiler_shim(source: String, filename: String = "", associated_global_id: String = ""):
 	var scanner: ESCScanner = ESCScanner.new()
 	scanner.set_source(source)
 	scanner.set_filename(filename)
@@ -93,7 +112,7 @@ func _compiler_shim(source: String, filename: String = ""):
 	var tokens = scanner.scan_tokens()
 
 	var parser: ESCParser = ESCParser.new()
-	parser.init(self, tokens)
+	parser.init(self, tokens, associated_global_id)
 
 	var parsed_statements = parser.parse()
 
@@ -121,15 +140,37 @@ func _compiler_shim(source: String, filename: String = ""):
 
 	if not had_error:
 		for ps in parsed_statements:
-			script.events[ps.get_event_name()] = ps
+			if script.has_event_with_target(
+				ps.get_event_name(),
+				ps.get_target_name()
+			):
+				ESCSafeLogging.log_error(
+					self,
+					"Duplicate event '%s' with target '%s'." % [
+						ps.get_event_name(),
+						ps.get_target_name()
+					]
+				)
+				had_error = true
+				continue
 
+			script.events.add(ps)
 	return script
-	#if not had_error:
-	#	interpreter.interpret(parsed_statements)
 
 
-# Load an ESC file from a file resource
-func load_esc_file(path: String) -> ESCScript:
+## Load an ESC file from a file resource. We also accept an optional global ID of whatever object is associated with the ESC file. Note that we don't need to do the same for a room-attached script since the current room's global_id is always available as an Escoria global.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |path|`String`|the path of the script file to load|yes|[br]
+## |associated_global_id|`String`|global ID of the object/room associated with the script file, if any (may be empty)|no|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `ESCScript` value. (`ESCScript`)
+func load_esc_file(path: String, associated_global_id: String = "") -> ESCScript:
 	ESCSafeLogging.log_debug(self, "Loading file '%s' for parsing..." % path)
 
 	if not FileAccess.file_exists(path):
@@ -139,17 +180,36 @@ func load_esc_file(path: String) -> ESCScript:
 
 	var file = FileAccess.open(path, FileAccess.READ)
 
-	return _compiler_shim(file.get_as_text(), path)
+	return _compiler_shim(file.get_as_text(), path, associated_global_id)
 
 
-func compile(script: String, path: String = "") -> ESCScript:
+## Compiles the passed-in script. TODO: `path` is extraneous and left in for legacy purposes; at some point, this will be removed which will require updating other methods that reference this one to ensure they don't pass in a second argument.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |script|`String`|A `String` containing the entirety of the script to be compiled.|yes|[br]
+## |path|`String`|NOT USED.|no|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `ESCScript` value. (`ESCScript`)
+func compile(script: String, _path: String = "") -> ESCScript:
 	return _compiler_shim(script)
 
 
-# *Returns*
-# true iff this is being called in-editor or the appropriate project setting is enabled
+## True if this is being called in-editor or the appropriate project setting is enabled.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns true if this is being called in-editor or the appropriate project setting is enabled. (`bool`)
 func _run_script_analysis() -> bool:
 	if Engine.is_editor_hint():
 		return true
 
-	return ProjectSettings.get_setting(ESCProjectSettingsManager.ENABLE_HOVER_STACK_VIEWER)
+	return ProjectSettings.get_setting(ESCProjectSettingsManager.PERFORM_SCRIPT_ANALYSIS_AT_RUNTIME)

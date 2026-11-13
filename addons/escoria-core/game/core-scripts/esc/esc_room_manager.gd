@@ -1,21 +1,27 @@
-extends Resource
+## A manager for rooms in a game.
+## @MANAGER
 class_name ESCRoomManager
+extends Resource
+## The room manager scene.
+## Manages room loading and keeps in memory
 
 
-# Reserved globals which can not be overridden; prefixed with "GLOBAL_"
-#
-# Contains the global_id of previous room
+## Reserved global containing the global_id of previous room. Cannot be overriden.
 const GLOBAL_LAST_SCENE = "ESC_LAST_SCENE"
 
-# If true, ESC_LAST_SCENE is not considered for automatic transitions
+## Reserved global name determining whether ESC_LAST_SCENE is considered for automatic transitions.
 const GLOBAL_FORCE_LAST_SCENE_NULL = "FORCE_LAST_SCENE_NULL"
 
+## Reserved global name containing the animations
 const GLOBAL_ANIMATION_RESOURCES = "ANIMATION_RESOURCES"
 
-# Contains the global_id of the current room
+## Reserved global name containing the global_id of the current room
 const GLOBAL_CURRENT_SCENE = "ESC_CURRENT_SCENE"
 
-# Dict of the reserved globals to register and their initial values.
+## Path to escoria-core camera scene
+const CAMERA_SCENE_PATH = "res://addons/escoria-core/game/scenes/camera_player/camera.tscn"
+
+## Dictionary of the reserved globals to register and their initial values.
 const RESERVED_GLOBALS = {
 	GLOBAL_LAST_SCENE: "",
 	GLOBAL_FORCE_LAST_SCENE_NULL: false,
@@ -25,18 +31,40 @@ const RESERVED_GLOBALS = {
 
 
 # ESC commands kept around for references to their command names.
+## Transition command
 var _transition: TransitionCommand
+
+## Wait command
 var _wait: WaitCommand
+
+## Accept input command
 var _accept_input: AcceptInputCommand
 
 
+## Constructor[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _init() -> void:
 	_transition = TransitionCommand.new()
 	_wait = WaitCommand.new()
 	_accept_input = AcceptInputCommand.new()
 
 
-# Registers all reserved global flags for use.
+## Registers all reserved global flags for use.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## None.
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func register_reserved_globals() -> void:
 	for key in RESERVED_GLOBALS:
 		escoria.globals_manager.register_reserved_global( \
@@ -44,27 +72,134 @@ func register_reserved_globals() -> void:
 			RESERVED_GLOBALS[key])
 
 
-# Performs the actions needed in order to change the current scene to the one
-# specified by room_path.
-#
-# #### Parameters
-#
-# - room_path: Node path to the room that is to become the new current room.
-# - enable_automatic_transitions: Whether to play the transition between rooms
-#	automatically or to leave the responsibility to the developer.
+## Performs the actions needed in order to change the current scene to the one specified by room_path.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |room_path|`String`|Node path to the room that is to become the new current room.|yes|[br]
+## |enable_automatic_transitions|`bool`|Whether to play the transition between rooms automatically or to leave the responsibility to the developer.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func change_scene_to_file(room_path: String, enable_automatic_transitions: bool) -> void:
+	if not _check_and_prepare_managers_for_room(room_path):
+		return
+
+	# Load room scene
+	var res_room = escoria.resource_cache.get_resource(room_path)
+	if res_room == null:
+		escoria.logger.error(
+			self,
+			"Failed loading scene resource %s." % room_path
+		)
+		return
+
+	var room_scene = res_room.instantiate()
+	if room_scene:
+		if enable_automatic_transitions \
+				and escoria.event_manager.get_running_event(
+					escoria.event_manager.CHANNEL_FRONT
+				) != null:
+			room_scene.enabled_automatic_transitions = true
+		else:
+			room_scene.enabled_automatic_transitions = enable_automatic_transitions
+
+		# If the game scene is already in the tree but not a child of the room
+		# we remove it
+		if escoria.game_scene.is_inside_tree() \
+				and escoria.game_scene.get_parent() != room_scene:
+			var game_parent = escoria.game_scene.get_parent()
+			game_parent.remove_child(escoria.game_scene)
+
+		room_scene.add_child(escoria.game_scene)
+		room_scene.move_child(escoria.game_scene, 0)
+		room_scene.game = escoria.game_scene
+
+		# If the scene we're loading is the same as the current one, disconnect
+		# the tree_exit signal on the existing items (that was connected when
+		# items got registered in Object Manager) so that objects for new items
+		# of the new room don't get unregistered.
+		var current_scene: Node = escoria.main.current_scene
+		var new_room_global_id: String = room_scene.global_id \
+				if not room_scene.global_id.is_empty() else room_scene.name
+		if is_instance_valid(current_scene):
+			var current_room_global_id: String = \
+					current_scene.global_id if not current_scene.global_id.is_empty() \
+					else current_scene.name
+			if new_room_global_id == current_room_global_id:
+				escoria.object_manager.disconnect_tree_exit_for_room_items(
+					escoria.object_manager.current_room_key
+				)
+
+		escoria.main.set_scene(room_scene)
+
+		# We know the scene has been loaded. Make its global ID available for
+		# use by ESC script.
+		escoria.globals_manager.set_global(
+			escoria.room_manager.GLOBAL_CURRENT_SCENE,
+			room_scene.global_id,
+			true
+		)
+
+		# Clear queued resources
+		escoria.resource_cache.clear()
+
+		escoria.inputs_manager.hotspot_focused = ""
+	else:
+		escoria.logger.error(
+			self,
+			"Failed loading room scene %s." % room_path
+		)
+
+## Changes the current scene to a NON-ESCORIA room scene. This allows to use full-Godot scenes in
+## the game, but requires to call Escoria functions from GDScript to change back to an Escoria room.
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |room_path|`String`|Node path to the scene to change to|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
+func change_scene_to_godot_file(room_path: String) -> void:
+	if not _check_and_prepare_managers_for_room(room_path):
+		return
+
+	# Load room scene
+	var res_room = escoria.resource_cache.get_resource(room_path)
+	var room_scene = res_room.instantiate()
+	escoria.add_child(room_scene)
+
+## Perform some checks and prepare Escoria managers for new room instanciation.
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |room_path|`String`|Node path to the scene to change to|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns `true` if a replacement scene should be instantiated, or `false` if the current room was reused.
+func _check_and_prepare_managers_for_room(room_path: String) -> bool:
 	if escoria.main \
 			and escoria.main.current_scene \
-			and escoria.main.current_scene.scene_file_path == room_path:
+			and escoria.main.current_scene.scene_file_path == room_path \
+			and not escoria.creating_new_game:
 		escoria.logger.info(
 			self,
 			"Attempting to change scene to same scene as the current scene. Aborting."
 		)
 		if not Engine.is_editor_hint() \
-				and (escoria.save_manager.is_loading_game or escoria.creating_new_game):
+				and escoria.save_manager.is_loading_game:
 			escoria.main.current_scene.enabled_automatic_transitions = false
 			escoria.room_manager.init_room(escoria.main.current_scene)
-		return
+		return false
 
 	# We're changing scenes, so users shouldn't be able to do stuff during.
 	escoria.inputs_manager.input_mode = escoria.inputs_manager.INPUT_NONE
@@ -76,9 +211,7 @@ func change_scene_to_file(room_path: String, enable_automatic_transitions: bool)
 	escoria.event_manager.set_changing_scene(true)
 
 	# If FORCE_LAST_SCENE_NULL is true, force ESC_LAST_SCENE to empty
-	if escoria.globals_manager.get_global( \
-		GLOBAL_FORCE_LAST_SCENE_NULL):
-
+	if escoria.globals_manager.get_global(GLOBAL_FORCE_LAST_SCENE_NULL):
 		escoria.globals_manager.set_global(
 			GLOBAL_LAST_SCENE,
 			null,
@@ -111,56 +244,20 @@ func change_scene_to_file(room_path: String, enable_automatic_transitions: bool)
 			and escoria.game_scene.get_parent() == escoria.main.current_scene:
 		escoria.main.current_scene.remove_child(escoria.game_scene)
 
-	# Load room scene
-	var res_room = escoria.resource_cache.get_resource(room_path)
-
-	var room_scene = res_room.instantiate()
-	if room_scene:
-		if enable_automatic_transitions \
-				and escoria.event_manager.get_running_event(
-					escoria.event_manager.CHANNEL_FRONT
-				) != null:
-			room_scene.enabled_automatic_transitions = true
-		else:
-			room_scene.enabled_automatic_transitions = enable_automatic_transitions
-
-		# If the game scene is already in the tree but not a child of the room
-		# we remove it
-		if escoria.game_scene.is_inside_tree() \
-				and escoria.game_scene.get_parent() != room_scene:
-			var game_parent = escoria.game_scene.get_parent()
-			game_parent.remove_child(escoria.game_scene)
-
-		room_scene.add_child(escoria.game_scene)
-		room_scene.move_child(escoria.game_scene, 0)
-		room_scene.game = escoria.game_scene
-		escoria.main.set_scene(room_scene)
-
-		# We know the scene has been loaded. Make its global ID available for
-		# use by ESC script.
-		escoria.globals_manager.set_global(
-			escoria.room_manager.GLOBAL_CURRENT_SCENE,
-			room_scene.global_id,
-			true
-		)
-
-		# Clear queued resources
-		escoria.resource_cache.clear()
-
-		escoria.inputs_manager.hotspot_focused = ""
-	else:
-		escoria.logger.error(
-			self,
-			"Failed loading room scene %s." % room_path
-		)
+	return true
 
 
-# Sanitize camera limits, add player node and set the global id to the
-# name of this node if it's not set manually
-#
-# #### Parameters
-#
-# - room: The ESCRoom to be initialized for use.
+## Sanitize camera limits, add player node and set the global id to the name of this node if it's not set manually.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |room|`ESCRoom`|The ESCRoom to be initialized for use.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func init_room(room: ESCRoom) -> void:
 	if not is_instance_valid(room) || room == null:
 		escoria.logger.error(
@@ -226,13 +323,17 @@ func init_room(room: ESCRoom) -> void:
 	_perform_script_events(room)
 
 
-# Performs the ESC script events "setup" and "ready", in this order, if they are
-# present. Also manages automatic transitions.
-#
-# #### Parameters
-#
-# - room: The ESCRoom to be initialized for use.
-# *Returns*
+## Performs the ASHES script events `:setup` and `:ready`, in that order, if they are present. Also manages automatic transitions.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |room|`ESCRoom`|The ESCRoom to be initialized for use.|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns a `int` value. (`int`)
 func _perform_script_events(room: ESCRoom) -> int:
 	# Used to track whether any yields have been executed before the call to
 	# set_scene_finish.
@@ -262,7 +363,7 @@ func _perform_script_events(room: ESCRoom) -> int:
 			get_class())
 
 		escoria.event_manager.queue_event(
-			script_transition_out_compiled.events[escoria.event_manager.EVENT_TRANSITION_OUT],
+			script_transition_out_compiled.get_event_with_target(escoria.event_manager.EVENT_TRANSITION_OUT),
 			true
 		)
 
@@ -302,14 +403,6 @@ func _perform_script_events(room: ESCRoom) -> int:
 		if not is_instance_valid(room.player):
 			room.player = room.player_scene.instantiate()
 			room.add_child(room.player)
-			escoria.object_manager.register_object(
-				ESCObject.new(
-					room.player.global_id,
-					room.player
-				),
-				room,
-				true
-			)
 
 		if escoria.globals_manager.has(
 			escoria.room_manager.GLOBAL_ANIMATION_RESOURCES
@@ -345,12 +438,19 @@ func _perform_script_events(room: ESCRoom) -> int:
 
 	# Add new camera to scene being prepared.
 	if room.player_camera:
-		room.remove_child(room.player_camera)
+		room.remove_child(room.player_camera) # This unregisters the camera from object manager
 		room.player_camera.queue_free()
 	var new_player_camera: ESCCamera = escoria.resource_cache.get_resource(
-		escoria.CAMERA_SCENE_PATH
+		CAMERA_SCENE_PATH
 	).instantiate()
-	new_player_camera.register()
+	escoria.object_manager.register_object(
+		ESCObject.new(
+			ESCObjectManager.CAMERA,
+			new_player_camera
+		),
+		null,
+		true
+	)
 	room.player_camera = new_player_camera
 
 	# We must first set the camera limits, and then worry about subsequent
@@ -451,10 +551,10 @@ func _perform_script_events(room: ESCRoom) -> int:
 	var script_transition_in = escoria.esc_compiler.compile(transition_in_script.build())
 
 	escoria.event_manager.queue_event(
-		script_transition_in.events[escoria.event_manager.EVENT_TRANSITION_IN]
+		script_transition_in.get_event_with_target(escoria.event_manager.EVENT_TRANSITION_IN)
 	)
 
-	if not escoria.current_state == escoria.GAME_STATE.LOADING:
+	if not escoria.current_state == escoria.GameState.LOADING:
 		var ready_event_added: bool = false
 		# Run the ready event, if there is one.
 		ready_event_added = _run_script_event(escoria.event_manager.EVENT_READY, room)
@@ -495,15 +595,18 @@ func _perform_script_events(room: ESCRoom) -> int:
 	return ESCExecution.RC_OK
 
 
-# Runs the script event from the script attached, if any.
-#
-# #### Parameters
-#
-# - event_name: the name of the event to run
-# - room: The ESCRoom to be initialized for use.
-#
-# *Returns* true if the event was correctly added. Will be false if the event
-# does not exist in the script.
+## Runs the script event from the script attached, if any. does not exist in the script.[br]
+## [br]
+## #### Parameters[br]
+## [br]
+## | Name | Type | Description | Required? |[br]
+## |:-----|:-----|:------------|:----------|[br]
+## |event_name|`String`|The name of the event to run|yes|[br]
+## |room|`ESCRoom`|The ESCRoom to be initialized for use|yes|[br]
+## [br]
+## #### Returns[br]
+## [br]
+## Returns nothing.
 func _run_script_event(event_name: String, room: ESCRoom):
 	if not room.esc_script:
 		return false
@@ -511,14 +614,15 @@ func _run_script_event(event_name: String, room: ESCRoom):
 		room.compiled_script = \
 			escoria.esc_compiler.load_esc_file(room.esc_script)
 
-	if room.compiled_script.events.has(event_name):
+	if room.compiled_script.has_event_with_target(event_name):
+		var event = room.compiled_script.get_event_with_target(event_name)
 		escoria.logger.debug(
 			self,
 			"Queuing room script event %s " % event_name +
 			"composed of %s statements."
-					% room.compiled_script.events[event_name].get_num_statements_in_block()
+					% event.get_num_statements_in_block()
 		)
-		escoria.event_manager.queue_event(room.compiled_script.events[event_name], true)
+		escoria.event_manager.queue_event(event, true)
 		return true
-	else:
-		return false
+
+	return false
