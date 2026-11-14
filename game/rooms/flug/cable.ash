@@ -1,27 +1,27 @@
 # Flu-G (Sosage data/objects/cable.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "cable")
+	face("sophie", "cable")
 	say("sophie", "It's a bare wire connected to the Suit-o-Matic.")
 
 :move | TK
-	turn_to("sophie", "cable")
+	face("sophie", "cable")
 	say("sophie", "It's a cable, not a flush.")
 
 :combine "bottle"
 	accept_input("NONE")
-	turn_to("sophie", "cable")
+	face("sophie", "cable")
 	wait(0.2)
 	say("sophie", "Uhhh...")
-	turn_to("sophie", "car")
+	face("sophie", "car")
 	wait(0.5)
-	turn_to("sophie", "cable")
+	face("sophie", "cable")
 	wait(0.5)
-	turn_to("sophie", "car")
+	face("sophie", "car")
 	wait(0.5)
 	say("sophie", "Kids...")
 	say("sophie", "... don't try this at home.")
-	turn_to("sophie", "cable")
+	face("sophie", "cable")
 	wait(1)
 	action("sophie", 0.2)
 	show_item("sophie", false)
@@ -38,6 +38,9 @@
 	play_snd("res://game/sounds/effects/costumomatic_porte_claque.ogg")
 	wait(0.6)
 	set_state("suit_door", "open")
+	# the opening animation keeps its last frame until the open door is there
+	# (Sosage: the animation ends, then the state changes)
+	anim("anim_suit_door", "stop")
 	wait(0.3)
 	anim("anim_superflu_stuck", "stop")
 	anim("anim_superflu_fall2", "play")
@@ -48,11 +51,13 @@
 	set_active("superflu_target", false)
 	superflu_free = true
 	set_active("superflu", true)
+	# the fall keeps its last frame until Superflu is there
+	anim("anim_superflu_fall2", "stop")
 	wait(0.7)
 	say("superflu", "Ahem...")
 	walk_to_pos_block("superflu", 1588, 946)
-	turn_to("sophie", "superflu")
-	turn_to("superflu", "sophie")
+	face("sophie", "superflu")
+	face("superflu", "sophie")
 	say("superflu", "Thanks, Sophie. I owe you a big flavor, as they say.")
 	say("sophie", "Do they say that?")
 	say("superflu", "What would you say?")

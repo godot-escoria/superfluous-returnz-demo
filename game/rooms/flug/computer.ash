@@ -1,7 +1,7 @@
 # Flu-G (Sosage data/objects/ordinateur_flug.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "computer")
+	face("sophie", "computer")
 	if computer_state == "error":
 		say("sophie", "System error...")
 	elif computer_state == "off":
@@ -25,16 +25,16 @@
 			hint_flug_ok = true
 		say("sophie", "“Have you tried turning it off and on again?” It always works!")
 	elif computer_state == "on":
-		turn_to("sophie", "computer")
+		face("sophie", "computer")
 		say("sophie", "The system looks operational, I have nothing else to do there, the Suit-o-Matic must be controlled elsewhere.")
 	else:
-		turn_to("sophie", "computer")
+		face("sophie", "computer")
 		say("sophie", "The screen blew up...")
 
 :combine "usb_key" | TK
-	turn_to("sophie", "computer")
+	face("sophie", "computer")
 	say("sophie", "There is no USB port on this computer.")
 
 :combine "bottle" | TK
-	turn_to("sophie", "computer")
+	face("sophie", "computer")
 	say("sophie", "This computer has enough problems like this...")

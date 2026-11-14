@@ -1,7 +1,7 @@
 # Flu-G (Sosage data/objects/flumobile.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "car")
+	face("sophie", "car")
 	say("sophie", "That's a Twingo... well, that's the “Fluousmobile”, it seems.")
 
 :move
@@ -29,23 +29,23 @@
 		set_active("bulb", false)
 
 :take | TK
-	turn_to("sophie", "car")
+	face("sophie", "car")
 	say("sophie", "I'm not leaving without Harpagon!")
 
 :combine "cotton_swab" | TK
-	turn_to("sophie", "car")
+	face("sophie", "car")
 	say("sophie", "A key would be better.")
 
 :combine "poker" | TK
-	turn_to("sophie", "car")
+	face("sophie", "car")
 	say("sophie", "I'm not going to break into the boss's car...")
 
 :combine "bottle" | TK
-	turn_to("sophie", "car")
+	face("sophie", "car")
 	say("sophie", "It's clean enough as it is.")
 
 :combine "car_keys" | TK
-	turn_to("sophie", "car")
+	face("sophie", "car")
 	action("sophie", 0.5)
 	if car_state == "locked":
 		wait(0.25)

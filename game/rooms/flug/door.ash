@@ -1,7 +1,7 @@
 # Flu-G (Sosage data/objects/porte.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "door")
+	face("sophie", "door")
 	say("sophie", "It's a door. Fascinating...")
 
 :move

@@ -1,7 +1,7 @@
 # Bureau (Sosage data/objects/buste_gnu.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "gnustatue")
+	face("sophie", "gnustatue")
 	say("sophie", "Gonzague von Gnu, “fluctuat nec privatur”, undoubtedly a celebrity.")
 
 :move
@@ -24,5 +24,5 @@
 			inventory_add("small_key")
 
 :combine "poker" | TK
-	turn_to("sophie", "gnustatue")
+	face("sophie", "gnustatue")
 	say("sophie", "I should avoid damaging the works of art...")

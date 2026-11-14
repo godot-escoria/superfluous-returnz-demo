@@ -1,12 +1,12 @@
 # Flu-G (Sosage data/objects/levier4.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "lever4")
+	face("sophie", "lever4")
 	say("sophie", "It's a lever. It moves from left to right and vice versa.")
 
 :move | TK<levers_done>
 	if levers_done:
-		turn_to("sophie", "lever4")
+		face("sophie", "lever4")
 		say("sophie", "The levers are well oriented, no need to move them.")
 	else:
 		action("sophie", 0.2)

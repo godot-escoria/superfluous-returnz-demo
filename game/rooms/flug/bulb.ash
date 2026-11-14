@@ -1,7 +1,7 @@
 # Flu-G (Sosage data/objects/ampoule.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "bulb")
+	face("sophie", "bulb")
 	say("sophie", "It's a new bulb.")
 
 :take

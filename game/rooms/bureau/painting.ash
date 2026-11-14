@@ -1,7 +1,7 @@
 # Bureau (Sosage data/objects/tableau.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "painting")
+	face("sophie", "painting")
 	say("sophie", "Contemporary art. Some people like this...")
 
 :move
@@ -15,13 +15,13 @@
 	say("sophie", "The safe behind the painting, classic!")
 
 :combine "bottle" | TK
-	turn_to("sophie", "painting")
+	face("sophie", "painting")
 	say("sophie", "I don't want to damage it.")
 
 :combine "poker" | TK
-	turn_to("sophie", "painting")
+	face("sophie", "painting")
 	say("sophie", "The painting doesn't seem attached, I can probably move it without the poker.")
 
 :combine "ashes" | TK
-	turn_to("sophie", "painting")
+	face("sophie", "painting")
 	say("sophie", "Let's avoid spoiling the artwork of the boss.")

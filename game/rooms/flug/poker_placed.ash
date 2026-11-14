@@ -1,12 +1,12 @@
 # Flu-G (Sosage data/objects/tisonnier_pose.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "poker_placed")
+	face("sophie", "poker_placed")
 	say("sophie", "It perfectly replaces the missing lever!")
 
 :move | TK<levers_done>
 	if levers_done:
-		turn_to("sophie", "poker_placed")
+		face("sophie", "poker_placed")
 		say("sophie", "The levers are well oriented, no need to move them.")
 	else:
 		action("sophie", 0.2)
@@ -28,5 +28,5 @@
 			play_snd("res://game/sounds/effects/ding.ogg")
 
 :take | TK
-	turn_to("sophie", "poker_placed")
+	face("sophie", "poker_placed")
 	say("sophie", "It's very good where it is.")

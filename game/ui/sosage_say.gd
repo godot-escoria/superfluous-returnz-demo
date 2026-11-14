@@ -20,6 +20,9 @@ const SOSAGE_CHAR_SPOKEN_TIME := 0.05  # seconds per character (lips moving)
 
 # Incremented on every line, so an old lips timer doesn't stop a newer line
 var _say_id: int = 0
+# whose lips are moving (the line's timer stops them; a new line by someone
+# else stops them at once)
+var _talking: Node = null
 
 
 func _ready():
@@ -81,7 +84,12 @@ func say(character: String, line: String):
 			ProjectSettings.get_setting("display/window/size/viewport_width") / 2.0,
 			ProjectSettings.get_setting("display/window/size/viewport_height") / 2.0))
 
-	# The whole line at once; the lips move for 0.05 s per character
+	# The whole line at once; the lips move for 0.05 s per character. Someone
+	# else still moving their lips (a line skipped before its time) stops now:
+	# the timer below only stops the lips of the latest line.
+	if is_instance_valid(_talking) and _talking != _current_character:
+		_talking.stop_talking()
+	_talking = _current_character
 	_current_character.start_talking()
 	_say_id += 1
 	var this_say := _say_id
@@ -90,6 +98,7 @@ func say(character: String, line: String):
 		func():
 			if this_say == _say_id and is_instance_valid(talking_character):
 				talking_character.stop_talking()
+				_talking = null
 	)
 
 	text_node.visible_ratio = 1.0

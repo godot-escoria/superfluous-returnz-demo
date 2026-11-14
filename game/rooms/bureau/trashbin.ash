@@ -1,11 +1,11 @@
 # Bureau (Sosage data/objects/corbeille.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "trashbin")
+	face("sophie", "trashbin")
 	say("sophie", "It's a small office trash can, Harpagon will throw absolutely anything in it.")
 
 :move | TK
-	turn_to("sophie", "trashbin")
+	face("sophie", "trashbin")
 	say("sophie", "I don't want to overthrow it.")
 
 :take
@@ -23,29 +23,29 @@
 		trash_searched = true
 
 :combine "phone" | TK
-	turn_to("sophie", "trashbin")
+	face("sophie", "trashbin")
 	say("sophie", "I'm not gonna throw away my phone!")
 
 :combine "usb_key" | TK
-	turn_to("sophie", "trashbin")
+	face("sophie", "trashbin")
 	say("sophie", "I'm not going to throw it away...")
 
 :combine "cotton_swab" | TK
-	turn_to("sophie", "trashbin")
+	face("sophie", "trashbin")
 	say("sophie", "I'm gonna keep it for now.")
 
 :combine "ashes" | TK
-	turn_to("sophie", "trashbin")
+	face("sophie", "trashbin")
 	say("sophie", "I'm gonna keep them, just in case.")
 
 :combine "poker" | TK
-	turn_to("sophie", "trashbin")
+	face("sophie", "trashbin")
 	say("sophie", "I need it.")
 
 :combine "small_key" | TK
-	turn_to("sophie", "trashbin")
+	face("sophie", "trashbin")
 	say("sophie", "I'm not going to throw it away...")
 
 :combine "bottle" | TK
-	turn_to("sophie", "trashbin")
+	face("sophie", "trashbin")
 	say("sophie", "It is not airtight, it would make a mess...")

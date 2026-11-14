@@ -1,12 +1,12 @@
 # Flu-G (Sosage data/objects/bouton_rouge.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "red_button")
+	face("sophie", "red_button")
 	say("sophie", "You just want to press it...")
 
 :move | TK<suit_exploded>
 	if suit_exploded:
-		turn_to("sophie", "red_button")
+		face("sophie", "red_button")
 		say("sophie", "The computer is broken, it's no longer useful.")
 	elif computer_state != "on":
 		action("sophie", 0.4)
@@ -67,7 +67,7 @@
 				say("superflu", "AAaaaahhhh!")
 				say("sophie", "Mr. Lonion?")
 				walk_block("sophie", "superflu_target")
-				turn_to("sophie", "superflu_target")
+				face("sophie", "superflu_target")
 				say("superflu", "Sophie?")
 				say("sophie", "What on Earth are you doing upside down?")
 				say("superflu", "I'm doing bench press...")

@@ -4,7 +4,7 @@
 	say("sophie", "I can never get him to use a gourd... Harpagon loves his disposable plastic!")
 
 :move | TK
-	turn_to("sophie", "bottle")
+	face("sophie", "bottle")
 	say("sophie", "And spill it on the keyboard? No thanks.")
 
 :take

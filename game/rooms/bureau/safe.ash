@@ -1,7 +1,7 @@
 # Bureau (Sosage data/objects/coffre_fort.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "safe")
+	face("sophie", "safe")
 	say("sophie", "I guess Harpagon only stores important items there.")
 
 :move
@@ -23,15 +23,15 @@
 			set_active("usb_key", true)
 
 :combine "bottle" | TK
-	turn_to("sophie", "safe")
+	face("sophie", "safe")
 	say("sophie", "The short circuit will be a last resort.")
 
 :combine "poker" | TK
-	turn_to("sophie", "safe")
+	face("sophie", "safe")
 	say("sophie", "The safe is reinforced, I won't be able to open it like that.")
 
 :combine "cotton_swab" | TK
-	turn_to("sophie", "safe")
+	face("sophie", "safe")
 	say("sophie", "It seems a little too soft to open a safe.")
 
 :combine "ashes"

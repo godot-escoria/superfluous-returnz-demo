@@ -1,7 +1,7 @@
 # Flu-G (Sosage data/objects/clef_flumobile.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "car_keys")
+	face("sophie", "car_keys")
 	say("sophie", "Have you noticed that we say “the keys to the car” even though there's only one of them?")
 
 :take

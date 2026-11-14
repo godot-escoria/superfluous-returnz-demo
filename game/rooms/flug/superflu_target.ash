@@ -1,11 +1,11 @@
 # Flu-G (Sosage data/objects/superflu_target.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "superflu_target")
+	face("sophie", "superflu_target")
 	say("sophie", "He's Harpagon Lonion, aka Superfluous, my boss...")
 
 :move | TK
-	turn_to("sophie", "superflu_target")
+	face("sophie", "superflu_target")
 	?!
 		- "How did you manage to get stuck like that?"
 			say("sophie", "How did you manage to get stuck like that?")
@@ -41,5 +41,5 @@
 			done
 
 :take | TK
-	turn_to("sophie", "superflu_target")
+	face("sophie", "superflu_target")
 	say("sophie", "No.")

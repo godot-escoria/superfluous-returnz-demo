@@ -28,17 +28,17 @@
 		say("sophie", "Alright, I plugged the key in the right direction. There's just a PDF on it.")
 
 :combine "cotton_swab" | TK
-	turn_to("sophie", "computer")
+	face("sophie", "computer")
 	say("sophie", "There is no Q-tip port on this computer.")
 
 :combine "small_key" | TK
-	turn_to("sophie", "computer")
+	face("sophie", "computer")
 	say("sophie", "There is no lock on the computer.")
 
 :combine "poker" | TK
-	turn_to("sophie", "computer")
+	face("sophie", "computer")
 	say("sophie", "A revolutionary hacking technique? No.")
 
 :combine "bottle" | TK
-	turn_to("sophie", "computer")
+	face("sophie", "computer")
 	say("sophie", "Tripping the computer, of course, a good idea...")

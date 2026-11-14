@@ -1,7 +1,7 @@
 # Bureau (Sosage data/objects/plante.yaml), English texts from locale.yaml
 
 :look | TK
-	turn_to("sophie", "plant")
+	face("sophie", "plant")
 	say("sophie", "It's a yucca... it's pretty and it doesn't require too much care.")
 
 :move | TK<plant_moved>
@@ -12,7 +12,7 @@
 		set_active("keyhole", true)
 		plant_moved = true
 	else:
-		turn_to("sophie", "plant")
+		face("sophie", "plant")
 		say("sophie", "I'm not going to spend my time moving it...")
 
 :combine "bottle"
