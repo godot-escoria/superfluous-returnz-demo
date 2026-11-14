@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3]
+[gd_scene load_steps=34 format=3]
 
 [ext_resource type="Script" path="res://addons/escoria-core/game/core-scripts/esc_item.gd" id="1_pe4pj"]
 [ext_resource type="Texture2D" path="res://game/images/characters/superflu_marche.png" id="2_10hwm"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" path="res://game/images/characters/superflu_accroupi.png" id="60_crouch"]
 [ext_resource type="Script" uid="uid://g7gc1hng8mq1" path="res://addons/escoria-core/game/core-scripts/esc_dialog_location.gd" id="7_58kao"]
 
+[ext_resource type="Script" path="res://game/characters/sosage_idle.gd" id="sosage_idle"]
 [sub_resource type="AtlasTexture" id="AtlasTexture_7ml3n"]
 atlas = ExtResource("3_aakni")
 
@@ -167,7 +168,7 @@ tracks/11/keys = {
 
 [sub_resource type="Animation" id="Animation_2sys2"]
 resource_name = "idle_left"
-length = 4
+length = 3600
 loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -248,10 +249,10 @@ tracks/6/path = NodePath("body/head:frame")
 tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
-"times": PackedFloat32Array(0, 3, 3.083),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [6, 5, 6]
+"values": [6]
 }
 tracks/7/type = "value"
 tracks/7/imported = false
@@ -304,7 +305,7 @@ tracks/10/keys = {
 
 [sub_resource type="Animation" id="Animation_a07ay"]
 resource_name = "idle_right"
-length = 4
+length = 3600
 loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -385,10 +386,10 @@ tracks/6/path = NodePath("body/head:frame")
 tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
-"times": PackedFloat32Array(0, 3, 3.083),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [1, 0, 1]
+"values": [1]
 }
 tracks/7/type = "value"
 tracks/7/imported = false
@@ -2321,6 +2322,10 @@ libraries = {
 "": SubResource("AnimationLibrary_10f54")
 }
 
+
+
+[node name="idle" type="Node" parent="."]
+script = ExtResource("sosage_idle")
 
 [node name="ESCDialogLocation" type="Marker2D" parent="."]
 position = Vector2(0, -600)
